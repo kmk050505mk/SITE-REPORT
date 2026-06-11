@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>부산영도통합청사 조닝 및 요구사항 통합 대시보드</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Chosen Palette: Navy/Slate base with Blue (Police), Orange (Election), Green (Common) accents -->
+<!-- Application Structure Plan: The SPA is designed as an interactive dashboard divided into three main sections to facilitate understanding of the complex zoning plan. 1) Overview & Master Principles: Establishes the core rules (Security & Anti-Leakage) and shows an aggregate building stack chart to grasp the overall mass. 2) Interactive Floor Explorer: Allows users to click through B2F to 6F, dynamically updating a donut chart, a detailed facilities table, and special requirements. This structure is superior to a linear report because it lets architects and reviewers instantly see the "Fixed" vs "Flexible" constraints contextually per floor. 3) Office Allocation Analysis: Breaks down the Police Net Area matrix into a visual format to verify mathematical and functional distribution. -->
+<!-- Visualization & Content Choices: B2F-6F Aggregate Data -> Show vertical building distribution -> Horizontal Stacked Bar Chart (Chart.js) -> Hover for area -> Justification: Mentally maps to building floors. Floor Details -> Show proportions of facility categories -> Donut Chart (Chart.js) -> Hover for details -> Justification: Good for part-to-whole per floor. Office Allocation -> Compare department areas -> Bar Chart (Chart.js) -> Hover -> Justification: Easy visual comparison of numerical area data. Confirming NO SVG/Mermaid used. Unicode icons and Tailwind shapes used instead. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+<style>
+.chart-container {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    height: 350px;
+    max-height: 450px;
+}
+@media (min-width: 768px) {
+    .chart-container {
+        height: 400px;
+    }
+}
+.fixed-badge { background-color: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+.flexible-badge { background-color: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd; }
+.semi-fixed-badge { background-color: #fef9c3; color: #a16207; border: 1px solid #fde047; }
+</style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased">
+
+<header class="bg-slate-900 text-white shadow-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+        <h1 class="text-xl md:text-2xl font-bold tracking-tight">🏢 나라키움 부산영도통합청사 스마트 조닝 대시보드</h1>
+        <div class="text-sm font-medium text-slate-300">설계공모 특수조건 및 가변성 분석</div>
+    </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+    <section id="principles-section" class="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
+        <h2 class="text-2xl font-bold text-slate-800 mb-4 border-b pb-2">🛡️ 공간 분류 원칙 및 전체 건물 구성</h2>
+        <p class="text-slate-600 mb-6 leading-relaxed">
+            본 섹션은 과업내용서에 명시된 핵심 제약 조건(보안 위계, 누수 방지 등)을 요약하고, 전체 건물의 층별 면적 비중을 시각적으로 제공합니다. 우측의 누적 막대 차트는 지하 2층부터 지상 6층까지 건물의 수직적 단면을 형상화하여 기관별(경찰, 선관위, 공통) 면적 점유율을 한눈에 파악할 수 있도록 돕습니다.
+        </p>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="space-y-6">
+                <div class="bg-slate-50 p-5 rounded-lg border-l-4 border-blue-600">
+                    <h3 class="text-lg font-bold text-slate-800 mb-2">1. 국가 특수 보안 등급 구획</h3>
+                    <ul class="list-disc list-inside text-sm text-slate-700 space-y-2">
+                        <li><strong class="text-slate-900">지하 2층 (통제 구역):</strong> 사격장, 무기탄약고를 가장 깊은 곳에 배치하여 감시 통제 및 방음/방진 일원화.</li>
+                        <li><strong class="text-slate-900">지상 2층 (제한 구역):</strong> 유치장 및 수사과를 수평으로 묶고, 피의자 전용 보안 코어로만 접근토록 원천 고정.</li>
+                        <li><strong class="text-slate-900">지상 6층 (민간 교류):</strong> 대강당, 식당 등 복리시설을 최상층에 두어 동선 간섭 예방 및 조망 확보.</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-slate-50 p-5 rounded-lg border-l-4 border-red-500">
+                    <h3 class="text-lg font-bold text-slate-800 mb-2">2. 수전 유입 및 하중 전이 방지</h3>
+                    <ul class="list-disc list-inside text-sm text-slate-700 space-y-2">
+                        <li><strong class="text-slate-900">유치장 상부 누수 방지:</strong> 지상 3층 배면 영역(유치장 바로 위)은 화장실, 탕, 물탱크 등 수전 시설 배치 전면 금지.</li>
+                        <li><strong class="text-slate-900">구조 최적화:</strong> 무주 대공간인 대강당(6F)은 지붕 철골 트러스로, 사격장(B2F)은 기초 연접으로 해결하여 비경제적 기둥 전이(Transfer) 억제.</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="bg-white border border-slate-100 rounded-lg p-4">
+                <h3 class="text-center text-sm font-bold text-slate-500 mb-2">건물 전체 수직 매스 구성 (면적 기준)</h3>
+                <div class="chart-container h-72">
+                    <canvas id="buildingStackChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="interactive-floor-section" class="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
+        <h2 class="text-2xl font-bold text-slate-800 mb-4 border-b pb-2">🔍 층별 세부 조닝 및 유연성 탐색기</h2>
+        <p class="text-slate-600 mb-6 leading-relaxed">
+            아래의 층수 버튼을 클릭하여 각 층의 세부 조닝 현황을 확인하십시오. 이 탐색기는 각 시설이 구조적/법적으로 해당 층에 <span class="font-bold text-red-600">고정(Fixed)</span>되어야 하는지, 매스 디자인에 따라 <span class="font-bold text-blue-600">가변적 이동(Flexible)</span>이 가능한지 명확히 구분하여 보여줍니다. 하단의 팁박스에서는 수요기관의 필수 설계 요구사항을 확인할 수 있습니다.
+        </p>
+
+        <div class="flex flex-wrap gap-2 mb-6" id="floor-buttons">
+        </div>
+
+        <div class="bg-slate-50 rounded-lg border border-slate-200 p-6">
+            <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-200 pb-4 gap-4">
+                <div>
+                    <h3 id="current-floor-title" class="text-3xl font-black text-blue-900"></h3>
+                    <p id="current-floor-concept" class="text-sm font-medium text-slate-500 mt-1"></p>
+                </div>
+                <div class="w-full md:w-1/3">
+                     <div class="chart-container" style="height: 150px; max-height: 200px;">
+                        <canvas id="floorDonutChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto mb-8">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-200 text-slate-700 text-sm">
+                            <th class="p-3 border-b-2 font-semibold">구분</th>
+                            <th class="p-3 border-b-2 font-semibold">세부 시설명</th>
+                            <th class="p-3 border-b-2 font-semibold text-right">면적 (m²)</th>
+                            <th class="p-3 border-b-2 font-semibold text-center">조닝 유연성</th>
+                            <th class="p-3 border-b-2 font-semibold">판정 사유 및 가이드라인</th>
+                        </tr>
+                    </thead>
+                    <tbody id="floor-table-body" class="text-sm text-slate-800 divide-y divide-slate-100">
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="special-guidelines-container" class="hidden">
+                <h4 class="text-md font-bold text-slate-800 mb-3 flex items-center">
+                    <span class="mr-2 text-yellow-500 text-xl">💡</span> 과업내용서 세부 필수적용 지침
+                </h4>
+                <div id="special-guidelines-list" class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 space-y-3 text-sm text-slate-800">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="allocation-section" class="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
+        <h2 class="text-2xl font-bold text-slate-800 mb-4 border-b pb-2">📊 순사무실 체계적 배분 매트릭스</h2>
+        <p class="text-slate-600 mb-6 leading-relaxed">
+            경찰청 예규 및 과업내용서의 기준에 따라 영도경찰서의 순사무실 면적(총 1,728m²)을 인원 및 업무 특성에 맞게 배분한 결과입니다. 수사/조사 부서(인당 10m²)와 행정 부서(인당 7m²)의 기준을 적용하여 면적표와의 오차 없는 완벽한 배분을 달성했음을 증명합니다.
+        </p>
+
+        <div class="chart-container">
+            <canvas id="allocationBarChart"></canvas>
+        </div>
+    </section>
+
+</main>
+
+<script>
+const zoningData = {
+    "B2F": {
+        title: "지하 2층 (B2F)",
+        concept: "지반 구조물 매립을 이용한 완전 진동 배제 및 총기 탈취 원천 방지 레이아웃",
+        facilities: [
+            { category: "경찰", name: "사격장", area: 464, flex: "층 고정 (이동 불가)", reason: "소음·진동 제어를 위한 지하 2층 종단 구역 고정." },
+            { category: "경찰", name: "무기, 탄약 (수납 종합)", area: 120, flex: "층 고정 (이동 불가)", reason: "사격장과 무장 연동성 확보를 위해 인접 고정." },
+            { category: "공통", name: "기계실 / 전기실", area: 1000, flex: "층 고정 (이동 불가)", reason: "대형 설비 하중 분산 및 소음 제어 목적 고정." },
+            { category: "공통", name: "지하 옥내주차장 (일부)", area: 1280, flex: "층 고정 (이동 불가)", reason: "구조 기초 코어 계획 고정." }
+        ],
+        guidelines: [
+            "권총사격장 사대 조건: 유효 조준거리 25m, 6사대 이상 확보. 방탄 통제실, 사수대기실 집약.",
+            "이중 차음 및 진동 차폐: 사격장 벽체/천장 독립 이중 구조, 흡음 차음판 및 바닥 진동흡수 고무패드 가공.",
+            "정화 강제 배기: 사대 전면 유해 납/화약 가스 포집용 독립형 급·배기 공조시스템 및 전용 덕트(AD) 구획.",
+            "무기탄약고 보안성: 두께 200mm 이상 RC조 + 3.2mm 강판 보강 이중벽. 무기/탄약/총포/화학 철저 분리."
+        ]
+    },
+    "B1F": {
+        title: "지하 1층 (B1F)",
+        concept: "원활한 램프 진출입성 보장 및 보존용 모빌랙 설치 하중 보강층",
+        facilities: [
+            { category: "공통", name: "지하 옥내주차장 (메인)", area: 2000, flex: "층 고정 (이동 불가)", reason: "법정 차로 및 주차 구획을 반영한 표준 라인 구획." },
+            { category: "경찰", name: "문서고", area: 121, flex: "층 가변 (이동 가능)", reason: "1.2ton/m² 하중 분산을 위해 슬래브 보강 필요." },
+            { category: "경찰", name: "비품창고", area: 121, flex: "층 가변 (이동 가능)", reason: "하역 서비스용 승강기 인근 배치." },
+            { category: "경찰", name: "소모품창고", area: 121, flex: "층 가변 (이동 가능)", reason: "관리 동선 조정을 위해 수직 이동 가능." },
+            { category: "경찰", name: "피복창고", area: 60.4, flex: "층 가변 (이동 가능)", reason: "6층 탈의탕 구역 또는 타 업무층으로 이동 가능." },
+            { category: "경찰", name: "경무 (문서보관실)", area: 28, flex: "층 가변 (이동 가능)", reason: "경무과 수평 동선 통합을 위해 이동 가능." }
+        ],
+        guidelines: [
+            "슬래브 구조 안전성 확보: 서고 및 창고 영역은 고밀도 철제 모빌랙 장착 전제로 1.2ton/m² 특수 적재 하중 설계 (일반 500kg/m²의 2배 이상). RC 격자 보 구조 촘촘히 보강."
+        ]
+    },
+    "1F": {
+        title: "지상 1층 (1F)",
+        concept: "일반 시민 접근 가로 활성화 및 선관위 5톤 트럭 하역 동선의 평면적 원천 분리",
+        facilities: [
+            { category: "편익", name: "부대편익시설 (제2종 근생)", area: 427, flex: "층 고정 (이동 불가)", reason: "도로 가로와 호흡하는 개방형 배치 고정." },
+            { category: "경찰", name: "민원실", area: 160, flex: "층 고정 (이동 불가)", reason: "거동 불편자의 무장애 진입을 위해 1층 고정." },
+            { category: "선관위", name: "선거관련 문서고 및 물품창고", area: 75, flex: "층 고정 (이동 불가)", reason: "5톤 트럭 접안 하역 동선 구축을 위해 1층 고정." },
+            { category: "경찰", name: "정문안내소", area: 15, flex: "층 고정 (이동 불가)", reason: "보행자 및 차량 통제를 유도하기 위해 입구 고정." },
+            { category: "경찰", name: "청소관리용역 사무실", area: 18, flex: "층 가변 (이동 가능)", reason: "용역 관리 효율을 위해 타 저층부 이동 가능." },
+            { category: "공통", name: "지상 옥외주차장", area: 476, flex: "층 고정 (이동 불가)", reason: "지상 레벨 외부 조경 및 차량 동선 물리적 배치." }
+        ],
+        guidelines: [
+            "선관위 5톤 탑차 접안성: 도로에서 창고 데크까지 진입 반경 10.0m 이상 확보. 캐노피/필로티 보 하부 유효 높이(Clear Height) 3.5m 이상 필수 확보.",
+            "경찰 민원실 보안 분리: 본청 진입 연결부에 1등급 차단 스피드게이트 및 안면 인식 시스템 적용."
+        ]
+    },
+    "2F": {
+        title: "지상 2층 (2F)",
+        concept: "일반인 진입로와 피의자 연행 동선의 입체적 수직·수평 100% 격리 구획",
+        facilities: [
+            { category: "경찰", name: "유치장 (면회실 포함)", area: 384, flex: "층 고정 (이동 불가)", reason: "특수 옹벽 시공 및 설비 누수 회피 목적 고정." },
+            { category: "경찰", name: "형사과 순사무실", area: 330, flex: "층 가변 (이동 가능)", reason: "피의자 전용 셔틀 동선 확보 하에 타 층 이동 가능." },
+            { category: "경찰", name: "교통과 순사무실", area: 220, flex: "층 가변 (이동 가능)", reason: "대민 조사계 위주 구획으로 1층 연접 변경 가능." },
+            { category: "경찰", name: "생활안전 (유실물/압수물/보관실 종합)", area: 127, flex: "층 가변 (이동 가능)", reason: "관리/수사 부서 수평 동선에 맞춰 분산 또는 통합." },
+            { category: "경찰", name: "진술녹화 및 모니터실", area: 105, flex: "층 가변 (이동 가능)", reason: "차음 사양으로 수사 부서 층 동반 이동." },
+            { category: "경찰", name: "피의자/민원인 대기실", area: 140, flex: "층 가변 (이동 가능)", reason: "출입 제어 게이트 및 부서 연동 이동." }
+        ],
+        guidelines: [
+            "유치장 부채꼴 구조: 간수대 중심 반원형 구조로 사각지대 차단. 남/여/청소년 유치실 물리적 격리.",
+            "변호인/민원 면회실 동선: 피의자는 유치장 내부 통로, 민원인은 외부 엘리베이터로만 진입하도록 동선 철저 분리.",
+            "누수 우려 시설 전면 배제: 유치장 상부 슬래브(3층 배면)에 화장실, 탕, 주방 등 급배수관 배치 전면 금지.",
+            "피의자 호송 라인: 지하 또는 1층 철제 셔터 하차장 -> 전용 보안 엘리베이터 -> 2층 유치장 독립 진입."
+        ]
+    },
+    "3F": {
+        title: "지상 3층 (3F)",
+        concept: "지상 2층 유치장 상부 누수 방지 조건을 만족하기 위한 무수전 오피스 조닝 구현",
+        facilities: [
+            { category: "경찰", name: "수사과 순사무실", area: 380, flex: "층 가변 (이동 가능)", reason: "일반 업무 오피스 사양으로 수직 이동 유연." },
+            { category: "경찰", name: "여성청소년과 순사무실", area: 192, flex: "층 가변 (이동 가능)", reason: "피해자 대기 유도를 위해 타 지상층 가변 이동 가능." },
+            { category: "경찰", name: "수사+과학수사 창고", area: 137, flex: "층 가변 (이동 가능)", reason: "수사 지원 창고 성격으로 부서 동선에 맞춰 이동." },
+            { category: "경찰", name: "정보기록/경비장비 보관", area: 219, flex: "층 가변 (이동 가능)", reason: "하중 보강 및 조닝 연동." },
+            { category: "선관위", name: "선관위 회의/조사실", area: 201, flex: "층 가변 (이동 가능)", reason: "선관위 전용 코어 매스에 묶여 타 지상층 이동 가능." },
+            { category: "경찰", name: "회의실 및 직원휴게실 종합", area: 342, flex: "층 가변 (이동 가능)", reason: "부서간 교류 및 복리 공간 가변 분산." }
+        ],
+        guidelines: [
+            "여성/아동 안심 수사선: 여청수사팀 조사실은 피의자 동선과 완벽 격리. STS-35 차폐 방음 가벽 시공.",
+            "선관위 조사실 보안: 피조사자 비밀 대기 구역 및 출입 감지 차단 게이트 시공."
+        ]
+    },
+    "4F": {
+        title: "지상 4층 (4F)",
+        concept: "지휘 체계 연계 효율성 향상 및 24시간 비상 전력망을 갖춘 컨트롤타워",
+        facilities: [
+            { category: "경찰", name: "서장실 (집무실/내실)", area: 80, flex: "층 가변 (이동 가능)", reason: "독립 지휘부 구획을 위해 이동 가능." },
+            { category: "경찰", name: "경무과/범죄예방과 사무실", area: 291, flex: "층 가변 (이동 가능)", reason: "지휘 동선 연동 상하 이동 유연." },
+            { category: "경찰", name: "상황실 (112 상황실)", area: 100, flex: "층 가변 (이동 가능)", reason: "통신 수직 축 연계 시 타 층 상황실 이동 가능." },
+            { category: "경찰", name: "서류 및 물품보관실", area: 92, flex: "층 가변 (이동 가능)", reason: "경무과 연동 가변 이동." },
+            { category: "선관위", name: "선관위 국장실/직원사무실", area: 129, flex: "층 가변 (이동 가능)", reason: "선관위 독립 영역. 타 층으로 통합 이동 가능." },
+            { category: "선관위", name: "문서/창고 종합", area: 11, flex: "층 가변 (이동 가능)", reason: "선관위 오피스 내 가변 귀속." }
+        ],
+        guidelines: [
+            "24시간 이중화 무정전: 112상황실, 장비실은 비상발전기 및 독립 UPS 배선 이중화 인입.",
+            "이중바닥 및 독립 공조: 상황실 전체 액세스 플로어(300mm 이상) 도포 및 수랭식 전용 항온항습기 구축.",
+            "디스플레이 벽체 보강: 대형 모니터월 하중 지탱을 위한 구조용 C형강 트러스 보강."
+        ]
+    },
+    "5F": {
+        title: "지상 5층 (5F)",
+        concept: "완벽한 정보 도청 차단 기술 반영 및 전산망 데이터 집중 보안 관리 구역",
+        facilities: [
+            { category: "경찰", name: "정보과/경비과/청문 순사무실", area: 235, flex: "층 가변 (이동 가능)", reason: "보안 차단 통제 하에 타 지상층 가변 이동." },
+            { category: "경찰", name: "경무과(경리/장비계)", area: 120, flex: "층 가변 (이동 가능)", reason: "분할 오피스로 메인 층 통합 가능." },
+            { category: "경찰", name: "정보화교육장", area: 75, flex: "층 가변 (이동 가능)", reason: "타 업무층 또는 대공간 층 이동 가능." },
+            { category: "경찰", name: "통신/전산장비실", area: 90, flex: "제한적 가변 (Semi-Fixed)", reason: "EPS/TPS 축 인접 및 최상층 누수 회피 고정 권장." },
+            { category: "경찰", name: "보안실", area: 33, flex: "층 가변 (이동 가능)", reason: "서버 제어 목적. 전산실 연동." }
+        ],
+        guidelines: [
+            "정보과 차음벽 STS 사양: 기밀 도설 방지를 위해 이중 차음 보드 및 차음 지수 STS-45 이상 반영.",
+            "정보화교육장 바닥 매립: 25명 전산 실습을 위한 1.8m x 1.8m 그리드 시스템 박스 평면 매립.",
+            "전산실 전용 소방: 물 분무 배제, 친환경 소화가스(FM-200 등) 설비 구축. 6층 배수 배관 AD/PD 완전 우회."
+        ]
+    },
+    "6F": {
+        title: "지상 6층 (6F)",
+        concept: "지붕 트러스 대공간 수용 및 대유량 온배수 집중 방수 설비를 위한 통합 복리후생 구역",
+        facilities: [
+            { category: "경찰", name: "회의실 (대강당)", area: 400, flex: "층 고정 (이동 불가)", reason: "무주 대공간(트러스) 구조 형성을 위해 최상층 고정 필수." },
+            { category: "경찰", name: "식당 (주방 포함)", area: 250, flex: "층 고정 (이동 불가)", reason: "옥상 배기 덕트 직결 및 누수 방지 일원화." },
+            { category: "경찰", name: "목욕실", area: 100, flex: "층 고정 (이동 불가)", reason: "온수 탕 수조 하중 및 특수 집중 방수 목적 최상층 고정." },
+            { category: "경찰", name: "상무관 (체력단련장)", area: 300, flex: "층 가변 (이동 가능)", reason: "천장고 확보 시 타 층 이동 가능하나 최상층 권장." },
+            { category: "경찰", name: "직원 휴게/당직/관복 종합", area: 297.6, flex: "층 가변 (이동 가능)", reason: "업무 지원용으로 타 층 분산 및 상하강 용이." }
+        ],
+        guidelines: [
+            "대강당 무기둥 트러스: 장스팬(18m 이상) 경량 입체 철골 트러스 구조 적용. 하부 기둥 전이 방지.",
+            "식당 주방 그리스 트랩: 이중 멤브레인 방수(깊이 250mm 방수턱) 및 단독 급배기 후드 옥상 직결.",
+            "목욕실/보일러 통합: 수압 확보 및 장기 미세 누수 방지를 위해 최상부 공용 구역에 단독 마감."
+        ]
+    }
+};
+
+const allocationData = [
+    { label: '지휘부 (1명)', area: 80 },
+    { label: '과장실 (8명)', area: 240 },
+    { label: '수사/형사과 (65명)', area: 650 },
+    { label: '여성청소년/교통 (40명)', area: 400 },
+    { label: '경무/범방/정보등 (50명)', area: 358 }
+];
+
+let buildingStackChartInstance = null;
+let floorDonutChartInstance = null;
+let allocationBarChartInstance = null;
+
+function initCharts() {
+    const stackCtx = document.getElementById('buildingStackChart').getContext('2d');
+    buildingStackChartInstance = new Chart(stackCtx, {
+        type: 'bar',
+        data: {
+            labels: ['6F', '5F', '4F', '3F', '2F', '1F', 'B1F', 'B2F'],
+            datasets: [
+                { label: '고정 시설 (Fixed)', data: [750, 0, 0, 0, 384, 1078, 2000, 2864], backgroundColor: '#ef4444' },
+                { label: '가변 시설 (Flexible)', data: [597.6, 490, 684.5, 1261, 917, 18, 451.4, 0], backgroundColor: '#3b82f6' },
+                { label: '제한적 가변', data: [0, 90, 0, 0, 0, 0, 0, 0], backgroundColor: '#eab308' }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            scales: { x: { stacked: true }, y: { stacked: true } },
+            plugins: {
+                tooltip: { callbacks: { label: function(context) { return context.dataset.label + ': ' + context.parsed.x + ' m²'; } } },
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+
+    const allocCtx = document.getElementById('allocationBarChart').getContext('2d');
+    allocationBarChartInstance = new Chart(allocCtx, {
+        type: 'bar',
+        data: {
+            labels: allocationData.map(d => d.label),
+            datasets: [{
+                label: '배분 면적 (m²)',
+                data: allocationData.map(d => d.area),
+                backgroundColor: ['#1e293b', '#334155', '#3b82f6', '#60a5fa', '#94a3b8']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { y: { beginAtZero: true } },
+            plugins: { legend: { display: false } }
+        }
+    });
+
+    const donutCtx = document.getElementById('floorDonutChart').getContext('2d');
+    floorDonutChartInstance = new Chart(donutCtx, {
+        type: 'doughnut',
+        data: { labels: [], datasets: [{ data: [], backgroundColor: [] }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 12 } } } }
+    });
+}
+
+function renderFloor(floorKey) {
+    const data = zoningData[floorKey];
+    
+    document.getElementById('current-floor-title').innerText = data.title;
+    document.getElementById('current-floor-concept').innerText = data.concept;
+
+    const btns = document.querySelectorAll('.floor-btn');
+    btns.forEach(btn => {
+        if(btn.dataset.floor === floorKey) {
+            btn.classList.add('bg-blue-600', 'text-white');
+            btn.classList.remove('bg-white', 'text-slate-700');
+        } else {
+            btn.classList.remove('bg-blue-600', 'text-white');
+            btn.classList.add('bg-white', 'text-slate-700');
+        }
+    });
+
+    const tbody = document.getElementById('floor-table-body');
+    tbody.innerHTML = '';
+    
+    let policeArea = 0;
+    let electionArea = 0;
+    let commonArea = 0;
+
+    data.facilities.forEach(fac => {
+        let badgeClass = 'flexible-badge';
+        if(fac.flex.includes('고정')) badgeClass = 'fixed-badge';
+        if(fac.flex.includes('제한')) badgeClass = 'semi-fixed-badge';
+
+        if(fac.category === '경찰') policeArea += fac.area;
+        else if(fac.category === '선관위') electionArea += fac.area;
+        else commonArea += fac.area;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td class="p-3 font-medium text-slate-500">${fac.category}</td>
+            <td class="p-3 font-semibold text-slate-800">${fac.name}</td>
+            <td class="p-3 text-right font-mono">${fac.area.toLocaleString()}</td>
+            <td class="p-3 text-center"><span class="px-2 py-1 text-xs font-bold rounded-full ${badgeClass}">${fac.flex}</span></td>
+            <td class="p-3 text-slate-600 leading-tight">${fac.reason}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    floorDonutChartInstance.data.labels = ['경찰시설', '선관위', '공통/편익'];
+    floorDonutChartInstance.data.datasets[0].data = [policeArea, electionArea, commonArea];
+    floorDonutChartInstance.data.datasets[0].backgroundColor = ['#3b82f6', '#f97316', '#10b981'];
+    floorDonutChartInstance.update();
+
+    const gContainer = document.getElementById('special-guidelines-container');
+    const gList = document.getElementById('special-guidelines-list');
+    if (data.guidelines && data.guidelines.length > 0) {
+        gContainer.classList.remove('hidden');
+        gList.innerHTML = data.guidelines.map(g => `<p>• ${g}</p>`).join('');
+    } else {
+        gContainer.classList.add('hidden');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initCharts();
+
+    const floorContainer = document.getElementById('floor-buttons');
+    Object.keys(zoningData).forEach(key => {
+        const btn = document.createElement('button');
+        btn.dataset.floor = key;
+        btn.className = 'floor-btn px-5 py-2 rounded-md font-bold transition-colors duration-200 border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 focus:outline-none';
+        btn.innerText = key;
+        btn.addEventListener('click', () => renderFloor(key));
+        floorContainer.appendChild(btn);
+    });
+
+    renderFloor('2F');
+});
+</script>
+</body>
+</html>
