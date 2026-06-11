@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>나라키움 부산영도통합청사 세부조닝 대시보드</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<!-- Anti System / Linear-style Void-Black Glassmorphism -->
+<style>
+:root {
+    /* Color Palette from manual.html */
+    --color-primary: #5e6ad2;
+    --color-primary-hover: #828fff;
+    --color-primary-focus: #5e69d1;
+    --color-on-primary: #ffffff;
+    
+    --color-canvas: #010102;
+    --color-surface-1: #0f1011;
+    --color-surface-2: #141516;
+    --color-surface-3: #18191a;
+    --color-surface-4: #191a1b;
+    
+    --color-hairline: #23252a;
+    --color-hairline-strong: #34343a;
+    
+    --color-ink: #f7f8f8;
+    --color-ink-muted: #d0d6e0;
+    --color-ink-subtle: #8a8f98;
+    
+    --color-semantic-success: #27a644;
+    --color-semantic-error: #ff4444;
+    --color-semantic-warning: #f59e0b;
+    
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-text: 'Inter', sans-serif;
+    
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-pill: 9999px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    font-family: var(--font-text);
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+}
+
+/* Decorative background grid and glow */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.012) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.012) 1px, transparent 1px);
+    background-size: 60px 60px;
+    z-index: -1;
+    pointer-events: none;
+}
+
+body::after {
+    content: "";
+    position: fixed;
+    top: -20%; right: -10%; width: 50%; height: 50%;
+    background: radial-gradient(circle, rgba(94, 106, 210, 0.05) 0%, transparent 75%);
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* Header styling */
+.top-nav {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: 64px;
+    background: rgba(1, 1, 2, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--color-hairline);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.brand-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: var(--color-primary);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 0 12px rgba(94, 106, 210, 0.4);
+    font-size: 16px;
+}
+
+.brand-name {
+    font-family: 'Outfit', sans-serif;
+    font-size: 15px;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-ink);
+}
+
+.brand-sub {
+    font-size: 11px;
+    color: var(--color-ink-subtle);
+    font-weight: 500;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: var(--color-surface-2);
+    color: var(--color-ink-muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    border-radius: var(--radius-pill);
+    padding: 4px 12px;
+    border: 1px solid var(--color-hairline);
+}
+
+.status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--color-semantic-success);
+    box-shadow: 0 0 8px var(--color-semantic-success);
+}
+
+/* Main Container Layout */
+.container {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 32px 24px;
+}
+
+.hero-section {
+    margin-bottom: 32px;
+}
+
+.hero-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--color-primary);
+    margin-bottom: 8px;
+}
+
+.hero-title {
+    font-size: 36px;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    margin-bottom: 12px;
+    background: linear-gradient(to right, var(--color-ink) 50%, var(--color-ink-muted) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-desc {
+    font-size: 14px;
+    color: var(--color-ink-subtle);
+    max-width: 800px;
+    line-height: 1.6;
+}
+
+/* Layout Grid and Cards */
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+@media (min-width: 992px) {
+    .grid-2 {
+        grid-template-columns: 1.1fr 0.9fr;
+    }
+}
+
+.glass-card {
+    background-color: var(--color-surface-1);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    position: relative;
+}
+
+.card-title {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.card-desc {
+    font-size: 13px;
+    color: var(--color-ink-subtle);
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+/* Styling Principles Box */
+.principles-box {
+    background-color: rgba(94, 106, 210, 0.03);
+    border-left: 3px solid var(--color-primary);
+    border-right: 1px solid var(--color-hairline);
+    border-top: 1px solid var(--color-hairline);
+    border-bottom: 1px solid var(--color-hairline);
+    border-radius: var(--radius-md);
+    padding: 18px;
+    margin-bottom: 20px;
+}
+
+.principles-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-primary-hover);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.principles-list {
+    font-size: 12px;
+    color: var(--color-ink-muted);
+    list-style-type: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-family: var(--font-mono);
+}
+
+.principles-list li strong {
+    color: var(--color-ink);
+}
+
+/* Floor toggle buttons */
+.btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.floor-btn {
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-hairline);
+    color: var(--color-ink-subtle);
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.floor-btn:hover {
+    color: var(--color-ink);
+    border-color: var(--color-hairline-strong);
+    background-color: var(--color-surface-3);
+}
+
+.floor-btn.active {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 12px rgba(94, 106, 210, 0.35);
+}
+
+/* Table Design mimicking manual.html styles */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface-2);
+    margin-bottom: 24px;
+}
+
+.zoning-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    text-align: left;
+}
+
+.zoning-table th {
+    background-color: var(--color-surface-3);
+    color: var(--color-ink-subtle);
+    font-weight: 600;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--color-hairline-strong);
+}
+
+.zoning-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--color-hairline);
+    color: var(--color-ink-muted);
+}
+
+.zoning-table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.015);
+}
+
+.zoning-table font-mono {
+    font-family: var(--font-mono);
+}
+
+/* Table Footer Sum row */
+.zoning-table tr.sum-row td {
+    background-color: rgba(94, 106, 210, 0.05);
+    font-weight: 700;
+    color: var(--color-ink);
+    border-top: 1px solid var(--color-hairline-strong);
+    border-bottom: none;
+}
+
+/* Badges for flexibility */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: var(--radius-pill);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.badge-fixed {
+    background-color: rgba(255, 68, 68, 0.08);
+    color: var(--color-semantic-error);
+    border: 1px solid rgba(255, 68, 68, 0.2);
+}
+
+.badge-flexible {
+    background-color: rgba(94, 106, 210, 0.08);
+    color: var(--color-primary-hover);
+    border: 1px solid rgba(94, 106, 210, 0.2);
+}
+
+.badge-proposal {
+    background-color: rgba(39, 166, 68, 0.08);
+    color: var(--color-semantic-success);
+    border: 1px solid rgba(39, 166, 68, 0.2);
+}
+
+.badge-semi {
+    background-color: rgba(245, 158, 11, 0.08);
+    color: var(--color-semantic-warning);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+/* Dynamic Text colors */
+.color-police { color: #828fff; font-weight: 600; }
+.color-nec { color: var(--color-semantic-warning); font-weight: 600; }
+.color-amenity { color: var(--color-semantic-success); font-weight: 600; }
+.color-common { color: var(--color-ink-subtle); }
+
+/* Guidelines Box */
+.guideline-container {
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-top: 20px;
+}
+
+.guideline-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-semantic-warning);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.guideline-list {
+    font-size: 12px;
+    color: var(--color-ink-muted);
+    padding-left: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* Chart Styles */
+.chart-card-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    height: 320px;
+    margin-top: 16px;
+}
+
+.chart-footer-note {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-ink-subtle);
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    margin-top: 16px;
+    line-height: 1.5;
+}
+
+/* Floor Detail layout */
+.floor-detail-header {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--color-hairline);
+    padding-bottom: 16px;
+    margin-bottom: 20px;
+    gap: 12px;
+}
+
+@media (min-width: 768px) {
+    .floor-detail-header {
+        flex-direction: row;
+        align-items: center;
+    }
+}
+
+.floor-title-group h3 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--color-ink);
+}
+
+.floor-title-group p {
+    font-size: 12px;
+    color: var(--color-ink-subtle);
+    margin-top: 4px;
+}
+
+.donut-chart-box {
+    width: 220px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-hairline);
+    padding: 8px;
+    border-radius: var(--radius-md);
+}
+
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+    <div class="brand">
+        <div class="brand-logo">🏛️</div>
+        <div>
+            <span class="brand-name">나라키움 부산영도통합청사</span>
+            <div class="brand-sub">설계공모 세부조닝 & 1층 축소-상부확장형 주차 극대화 대시보드</div>
+        </div>
+    </div>
+    <div class="status-badge">
+        <div class="status-dot"></div>
+        <span>INTEGRATED ZONING v2.1 (Final Core-Zoning Alignment)</span>
+    </div>
+</nav>
+
+<main class="container">
+
+    <!-- HERO SECTION -->
+    <section class="hero-section">
+        <div class="hero-eyebrow">Project Design Analysis</div>
+        <h1 class="hero-title">수직 매스 평탄화 및 최종 조닝 정렬 대시보드</h1>
+        <p class="hero-desc">
+            본 대시보드는 지상 1F~2F의 **각 층 1,206.00㎡** 면적 규정과 지상 3F~6F의 **각 층 1,530.00㎡** 건축 매스 규정을 준수하면서, 수직 코어 정합성을 100% 만족하는 **최종 조닝 조율안(선관위 다목적회의실 1층 이전 및 피의자대기/녹화실 2층 고정안)**의 층별 설계 데이터를 종합 분석합니다.
+        </p>
+    </section>
+
+    <!-- SECTION 1: 전체 매스 구성 및 차트 -->
+    <section class="grid-2">
+        <!-- Left: Principle Info -->
+        <div class="glass-card">
+            <h2 class="card-title">🛡️ 공간 분류 원칙 및 전체 건물 구성</h2>
+            <p class="card-desc">
+                지침상 연접성과 수사 계호 효율을 극대화하기 위해 다목적회의실을 1층으로 복귀시키고, 피의자 대기/녹화실을 유치장층에 고정하여 동선 효율을 달성한 최종 설계안입니다.
+            </p>
+            
+            <div class="principles-box">
+                <h3 class="principles-title">💡 최종 조닝 정렬 핵심 요약</h3>
+                <ul class="principles-list">
+                    <li>• <strong>다목적회의실 1층 이전</strong>: 선거물품창고와 다목적회의실을 인접 배치하는 지침 100% 준수</li>
+                    <li>• <strong>피의자 대기실 및 진술녹화실 2층 고정</strong>: 유치장(2F)과 수평 연접하여 계호 관리 및 도주 방지 효율 극대화</li>
+                    <li>• <strong>선관위 사무 및 창고 분산 조닝</strong>: 1층(다목적, 창고, 문서고) 및 2층(사무 영역 198㎡)으로 조율 공존</li>
+                    <li>• <strong>부대편익시설 지상 1, 2층 필수 적용</strong>: 1층(A: 190.00㎡), 2층(B: 90.00㎡) 배치로 가로 접근성 회복</li>
+                    <li>• <strong>유실물보관실 지하 1층 이관</strong>: 지하 2층 사격 통제 구역으로부터 분리하여 보안과 민원 접근성 동시 확보</li>
+                    <li>• <strong>형사/수사/여청 3층 사법공조층 집약</strong>: 형사과(330㎡)와 수사과(380㎡)를 3층에 통합 배치하여 수사 시너지 극대화</li>
+                </ul>
+            </div>
+
+            <div class="principles-box" style="background-color: rgba(255, 255, 255, 0.015); border-left-color: var(--color-ink-subtle);">
+                <h3 class="principles-title" style="color: var(--color-ink-muted);">⚙️ 수직 코어 면적 고정 상수</h3>
+                <ul class="principles-list" style="color: var(--color-ink-subtle);">
+                    <li>• <strong>1F~2F 코어 면적: 300.00 ㎡</strong> (경찰 180 + A코어 80 + 유치 보안코어 40)</li>
+                    <li>• <strong>3F~6F 코어 면적: 260.00 ㎡</strong> (경찰 180 + A코어 80)</li>
+                    <li>• <strong>일반 공용 산출 비율</strong>: 전용 면적 대비 <strong>10%</strong> 고정 반영</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Right: Vertical Stack Chart -->
+        <div class="glass-card chart-card-wrapper">
+            <div>
+                <h2 class="card-title">📊 건물 전체 수직 매스 구성 (전용 vs 공용 m²)</h2>
+                <p class="card-desc">1,206㎡ 및 1,530㎡ 규정에 소수점 단위까지 정확히 수렴하는 스택 분석</p>
+            </div>
+            <div class="chart-container">
+                <canvas id="buildingStackChart"></canvas>
+            </div>
+            <div class="chart-footer-note">
+                <strong>💡 분석 노트:</strong> 1F/2F는 정확히 1,206.00㎡, 3F~6F는 정확히 1,530.00㎡로 균등화되었습니다. 지상 1층 옥외주차장(662.85㎡)은 전용/공용 면적에서 별도 분리하여 건물 실내 한도 1,206㎡를 오차 없이 수렴시켰습니다.
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 2: 층별 조닝 탐색기 -->
+    <section class="glass-card">
+        <h2 class="card-title">🔍 층별 세부 조닝 및 유연성 탐색기 (최종 조율안 반영)</h2>
+        <p class="card-desc">아래의 층수 버튼을 클릭하면 해당 층의 상세 시설 구성, 전용/공용 비율, 법적 고정 여부 및 조닝 설명서가 실시간 출력됩니다.</p>
+        
+        <div class="btn-group" id="floor-buttons">
+            <!-- Buttons dynamically generated -->
+        </div>
+
+        <div class="glass-card" style="background-color: var(--color-surface-2); padding: 20px; border-color: var(--color-hairline-strong);">
+            <div class="floor-detail-header">
+                <div class="floor-title-group">
+                    <h3 id="current-floor-title">지상 1층 (1F)</h3>
+                    <p id="current-floor-concept">교통·민원 접근 극대화 및 선관위 다목적회의실 1층 원복 [GFA 1206 밸런싱]</p>
+                </div>
+                <div class="donut-chart-box">
+                    <canvas id="floorDonutChart"></canvas>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="zoning-table">
+                    <thead>
+                        <tr>
+                            <th>구분</th>
+                            <th>세부 시설명</th>
+                            <th style="text-align: right;">전용면적(A)</th>
+                            <th style="text-align: right;">공용면적(B)</th>
+                            <th style="text-align: right; background-color: rgba(94, 106, 210, 0.03);">소계 (A+B)</th>
+                            <th style="text-align: center;">유연성 분류</th>
+                            <th>판정 사유 및 세부 조닝 지침</th>
+                        </tr>
+                    </thead>
+                    <tbody id="floor-table-body">
+                        <!-- Table content dynamically injected -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="special-guidelines-container" class="guideline-container">
+                <div class="guideline-title">⚠️ 과업내용서 세부 필수적용 지침</div>
+                <div class="guideline-list" id="special-guidelines-list">
+                    <!-- Guidelines dynamically injected -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 3: 순사무실 배분 매트릭스 -->
+    <section class="glass-card">
+        <h2 class="card-title">📊 순사무실 체적 배분 매트릭스 (전용+공용)</h2>
+        <p class="card-desc">경찰청 예규 및 과업내용서 기준에 따른 인원별 순사무실 면적(총 1,728 m²) 배분 검증</p>
+        <div class="chart-container" style="height: 380px;">
+            <canvas id="allocationBarChart"></canvas>
+        </div>
+    </section>
+
+</main>
+
+<script>
+const zoningData = {
+    "6F": {
+        title: "지상 6층 (6F)",
+        concept: "대강당 무기둥 트러스 대공간 수용 및 상무관 최상층 배치 구역 [GFA 1530 밸런싱]",
+        facilities: [
+            { category: "경찰", name: "회의실 (대강당)", net: 400.00, pub: 40.00, flex: "고정 시설", reason: "장스팬 무주 공간 구조 형성을 위해 최상층 고정 필수. (일반공용 10% 적용)" },
+            { category: "경찰", name: "보조시설 (식당)", net: 250.00, pub: 25.00, flex: "고정 시설", reason: "옥상 배기 덕트 직결 및 누수 방지 일원화. (일반공용 10% 적용)" },
+            { category: "경찰", name: "목욕실", net: 100.00, pub: 10.00, flex: "고정 시설", reason: "수조 하중 분산 및 방수 구획 목적 최상층 배치. (일반공용 10% 적용)" },
+            { category: "경찰", name: "상무관 (체력단련장)", net: 300.00, pub: 30.00, flex: "고정 시설", reason: "층고 확보가 필요한 대규모 체육시설로 6층 배치. (일반공용 10% 적용)" },
+            { category: "경찰", name: "직원휴게실 (남/여)", net: 42.60, pub: 4.26, flex: "고정 시설", reason: "과별/성별 분리 휴게실 확보 지침 준수. (일반공용 10% 적용)" },
+            { category: "경찰", name: "[제안] 6F 야외 전망 정원 및 데크", net: 61.95, pub: 6.19, flex: "제안 시설", reason: "식당 및 체력단련 연계형 옥상 조망 완충 공간. (일반공용 10% 적용)" },
+            { category: "공통", name: "수직 관통 코어 고정 면적", net: 0.00, pub: 260.00, flex: "고정 시설", reason: "수직 코어 상수 (경찰 전용 2개소 180.00㎡ + 코어 A 80.00㎡)" }
+        ],
+        guidelines: [
+            "대강당 무기둥 트러스: 장스팬(18m 이상) 구조를 위한 경량 철골 입체 트러스 계획 적용.",
+            "식당 주방: 습기 차단 및 누수 방지를 위한 특수 그리스 트랩턱(250mm) 및 옥상 배기 직결.",
+            "목욕실 하부 회피: 5층 전산장비실의 상부 누수 위험 배제를 위해 수평 평면 상에서 전산실 위치와 어긋나게 조닝."
+        ]
+    },
+    "5F": {
+        title: "지상 5층 (5F)",
+        concept: "정보과-교육장 인접 및 당직/관복 행정 업무 구역 [GFA 1530 밸런싱]",
+        facilities: [
+            { category: "경찰", name: "정보과 순사무실", net: 100.00, pub: 10.00, flex: "고정 시설", reason: "기밀 업무 수행에 적합한 보안 및 전산망 직결 구획. (일반공용 10% 적용)" },
+            { category: "경찰", name: "정보화교육장", net: 75.00, pub: 7.50, flex: "고정 시설", reason: "장비 연계 및 보안 조닝을 위해 정보과와 같은 층 인접 배치 고정. (일반공용 10% 적용)" },
+            { category: "경찰", name: "통신/전산장비실", net: 90.00, pub: 9.00, flex: "제한적 가변", reason: "EPS/TPS 주간선 연결 축 인접 및 상부 목욕실 하부 완전 우회 배치. (일반공용 10% 적용)" },
+            { category: "경찰", name: "보안실", net: 33.00, pub: 3.30, flex: "가변 시설", reason: "전산 서버 보조 감시실로 서버실과 연계 배치. (일반공용 10% 적용)" },
+            { category: "경찰", name: "여경/여직원 휴게실", net: 54.00, pub: 5.40, flex: "고정 시설", reason: "여경 및 직원 행정 지원용 고정 휴게공간 (5층 지침 반영). (일반공용 10% 적용)" },
+            { category: "경찰", name: "회의실 (소회의실 1/3)", net: 52.00, pub: 5.20, flex: "가변 시설", reason: "소회의실 3개층 분산 계획에 의거하여 5층 구획. (일반공용 10% 적용)" },
+            { category: "경찰", name: "당직실", net: 160.00, pub: 16.00, flex: "가변 시설", reason: "당직/관복 하향 이관 가이드에 따라 6층에서 5층으로 배치. (일반공용 10% 적용)" },
+            { category: "경찰", name: "관복보관 및 탈의실", net: 95.00, pub: 9.50, flex: "가변 시설", reason: "당직/관복 하향 이관 가이드에 따라 6층에서 5층으로 배치. (일반공용 10% 적용)" },
+            { category: "경찰", name: "경비과 순사무실", net: 100.00, pub: 10.00, flex: "가변 시설", reason: "일반 행정 오피스로 타 층과의 가변적 조율 용이. (일반공용 10% 적용)" },
+            { category: "경찰", name: "청문감사실 순사무실", net: 35.00, pub: 3.50, flex: "가변 시설", reason: "대민 서비스 향상을 위해 가변적 층 조율 가능. (일반공용 10% 적용)" },
+            { category: "경찰", name: "회의실 (업무자료실)", net: 33.00, pub: 3.30, flex: "가변 시설", reason: "직원 열람 및 보조 회의용 자료실. (일반공용 10% 적용)" },
+            { category: "경찰", name: "순사무실 (직원 정원 외/대기 보정)", net: 44.00, pub: 4.40, flex: "가변 시설", reason: "5층 면적 밸런싱용 예비 오피스. (일반공용 10% 적용)" },
+            { category: "경찰", name: "[제안] 5F 정보화 보안 게이트웨이", net: 283.55, pub: 28.35, flex: "제안 시설", reason: "기밀 업무 구역 진입 통제 차음벽 및 완충 가도 공간. (일반공용 10% 적용)" },
+            { category: "공통", name: "수직 관통 코어 고정 면적", net: 0.00, pub: 260.00, flex: "고정 시설", reason: "수직 코어 상수 (경찰 전용 2개소 180.00㎡ + 코어 A 80.00㎡)" }
+        ],
+        guidelines: [
+            "정보과 보안벽체: 도설 및 도청 방지를 위해 차음성능 STS-45 이상 이중 차음석고 시공.",
+            "전산 서버실 소화: 수손 피해 방지를 위한 무인 청정 가스(FM-200 등) 소화 설비 독립 구축."
+        ]
+    },
+    "4F": {
+        title: "지상 4층 (4F)",
+        concept: "서장 지휘 및 경무 행정 집중/상황 관리 통합 구역 [GFA 1530 밸런싱]",
+        facilities: [
+            { category: "경찰", name: "순사무실 기관장 (서장실)", net: 80.00, pub: 8.00, flex: "고정 시설", reason: "서장실 및 비서실, 내실 결합. 지휘 보안 확보용 4층 고정. (일반공용 10% 적용)" },
+            { category: "경찰", name: "경무과 순사무실 (경리/장비계 통합)", net: 276.00, pub: 27.60, flex: "가변 시설", reason: "서장 지휘 본부 배후 지원을 위한 4층 집중 배치. (일반공용 10% 적용)" },
+            { category: "경찰", name: "범죄예방과 순사무실", net: 135.00, pub: 13.50, flex: "가변 시설", reason: "치안 순찰 및 방범 정책 기획 오피스. (일반공용 10% 적용)" },
+            { category: "경찰", name: "경무과 지출서류 및 물품보관실", net: 92.00, pub: 9.20, flex: "가변 시설", reason: "경무과 본실과의 접근성을 고려하여 동시 층 조닝. (일반공용 10% 적용)" },
+            { category: "경찰", name: "상황실 (112 상황실)", net: 100.00, pub: 10.00, flex: "고정 시설", reason: "비상 상황 대기소 2개 구축 및 배선 고정형 상황 통제실. (일반공용 10% 적용)" },
+            { category: "경찰", name: "회의실 (소회의실 1/3)", net: 52.00, pub: 5.20, flex: "가변 시설", reason: "소회의실 3개층 분산 계획에 의거하여 4층 구획. (일반공용 10% 적용)" },
+            { category: "경찰", name: "회의실 (대회의실)", net: 99.00, pub: 9.90, flex: "가변 시설", reason: "이동성 가이드에 따라 5층에서 4층 경무과 옆으로 하향 이관. (일반공용 10% 적용)" },
+            { category: "경찰", name: "순사무실 (과장급 일부 4개소)", net: 120.00, pub: 12.00, flex: "가변 시설", reason: "지휘 관리 일원화를 위한 과장실 4개소 집중 조닝. (일반공용 10% 적용)" },
+            { category: "경찰", name: "[제안] 4F 작전 회의 전실 및 로비", net: 200.55, pub: 20.05, flex: "제안 시설", reason: "비상 상황 시 병목 해소를 위한 전실 로비 완충 구역. (일반공용 10% 적용)" },
+            { category: "공통", name: "수직 관통 코어 고정 면적", net: 0.00, pub: 260.00, flex: "고정 시설", reason: "수직 코어 상수 (경찰 전용 2개소 180.00㎡ + 코어 A 80.00㎡)" }
+        ],
+        guidelines: [
+            "112 상황실 비상 전원: UPS 및 비상발전기 이중화 라인 인입으로 24시간 무중단 운영 보장.",
+            "상황실 이중바닥: 복잡한 통신 배선 수용을 위해 300mm 이상 액세스 플로어 설치."
+        ]
+    },
+    "3F": {
+        title: "지상 3층 (3F) [사법공조층]",
+        concept: "수사/형사/여청 통합 사법공조 및 조사 부서 집중 조닝 [GFA 1530 밸런싱]",
+        facilities: [
+            { category: "경찰", name: "수사과 순사무실", net: 380.00, pub: 38.00, flex: "가변 시설", reason: "수사 부서 집중 조닝으로 3층 구성. (일반공용 10% 적용)" },
+            { category: "경찰", name: "여성청소년과 순사무실", net: 192.00, pub: 19.20, flex: "고정 시설", reason: "여청수사팀 연접 배치를 위해 3층 고정. (일반공용 10% 적용)" },
+            { category: "경찰", name: "여청수사팀 전용조사실", net: 40.00, pub: 4.00, flex: "고정 시설", reason: "아동/여성 피해자 보호 목적의 3층 전용 조사실 고정. (일반공용 10% 적용)" },
+            { category: "경찰", name: "회의실 (소회의실 1/3)", net: 52.00, pub: 5.20, flex: "가변 시설", reason: "소회의실 3개층 분산 계획에 의거하여 3층 구획. (일반공용 10% 적용)" },
+            { category: "경찰", name: "형사과 순사무실", net: 330.00, pub: 33.00, flex: "고정 시설", reason: "1층 면적 부족으로 인해 3층 사법공조층으로 통합 배치. (일반공용 10% 적용)" },
+            { category: "경찰", name: "[제안] 3F 사법공조 집중 로비 및 완충 공간", net: 160.55, pub: 16.06, flex: "제안 시설", reason: "형사/수사/여청 통합에 따른 방문인 대기 완충용 다목적 복도 로비. (일반공용 10% 적용)" },
+            { category: "공통", name: "수직 관통 코어 고정 면적", net: 0.00, pub: 260.00, flex: "고정 시설", reason: "수직 코어 상수 (경찰 전용 2개소 180.00㎡ + 코어 A 80.00㎡)" }
+        ],
+        guidelines: [
+            "수사 협동성 극대화: 수사과, 형사과, 여청과를 3층에 통합 조닝하여 내부 사법 공조 시너지 형성.",
+            "수직 보안 코어 연계: 2층 유치장 및 1층 민원 입구와 수직 보안 코어로 연결되어 직통 연계성 보장."
+        ]
+    },
+    "2F": {
+        title: "지상 2층 (2F) [유치 및 수사지원 층]",
+        concept: "유치장 및 피의자 대기/녹화실 집중 연접 및 선관위 공존 [GFA 1206 밸런싱]",
+        facilities: [
+            { category: "경찰", name: "유치장 (면회실 포함)", net: 384.00, pub: 38.40, flex: "고정 시설", reason: "피의자 구금 및 면회를 위한 감시 제어 특수 구조 2층 고정. (일반공용 10% 적용)" },
+            { category: "선관위", name: "선관위 2층 사무 영역", net: 198.00, pub: 19.80, flex: "고정 시설", reason: "선관위 독립 오피스 영역으로, 차단벽을 통해 경찰 구역과 엄격 격리. (일반공용 10% 적용)" },
+            { category: "경찰", name: "피의자 대기실", net: 80.00, pub: 8.00, flex: "고정 시설", reason: "★유치장 연접: 계호 편의 및 도주 방지를 위해 유치장과 동일 층(2F) 배치. (일반공용 10% 적용)" },
+            { category: "경찰", name: "진술녹화 및 모니터실", net: 65.00, pub: 6.50, flex: "고정 시설", reason: "★유치장 연접: 조사 효율 및 피의자 이동 보안을 위해 유치장 옆(2F) 고정. (일반공용 10% 적용)" },
+            { category: "편익", name: "부대편익시설 B (제2종 근생)", net: 90.00, pub: 9.00, flex: "고정 시설", reason: "★지상 필수적용: 2층 주민 접근 가로 활성화를 위해 축소 환원 배치. (일반공용 10% 적용)" },
+            { category: "공통", name: "[제안] 2F 유치-선관위 격리 및 보안 완충 통로", net: 6.64, pub: 0.66, flex: "제안 시설", reason: "유치장 구역과 선관위 점유 영역의 차단 및 가변 완충 통로 면적. (일반공용 10% 적용)" },
+            { category: "공통", name: "수직 관통 코어 고정 면적 (보안 코어 포함)", net: 0.00, pub: 300.00, flex: "고정 시설", reason: "수직 코어 상수 (경찰 전용 2개소 180.00㎡ + 코어 A 80.00㎡ + 피의자 보안코어 40.00㎡)" }
+        ],
+        guidelines: [
+            "피의자 계호 일원화: 피의자대기실, 녹화실을 유치장 옆에 두어 수직 이동 동선에 따른 피의자 도주 위험 완벽 차단.",
+            "물리적 차단벽 계획: 선관위 사무실과 경찰 유치장 구역 사이에 1등급 방화차단 보안 셔터 및 격리 가벽 시공."
+        ]
+    },
+    "1F": {
+        title: "지상 1층 (1F) [교통·민원 및 선관위 대민 층]",
+        concept: "교통과/민원실 고정 및 선관위 다목적회의실 1층 원복 적용 [GFA 1206 밸런싱]",
+        facilities: [
+            { category: "경찰", name: "민원실", net: 160.00, pub: 16.00, flex: "고정 시설", reason: "무장애 진입 및 거동불편인 접근 극대화를 위한 1층 고정. (일반공용 10% 적용)" },
+            { category: "경찰", name: "교통과 순사무실", net: 220.00, pub: 22.00, flex: "고정 시설", reason: "민원인 사고 접수 및 면허 갱신 편의성을 위한 1층 고정. (일반공용 10% 적용)" },
+            { category: "선관위", name: "선거관련 문서고 및 물품창고", net: 75.00, pub: 7.50, flex: "고정 시설", reason: "5톤 탑차 접안 하역성 보장을 위해 1층 고정. (일반공용 10% 적용)" },
+            { category: "선관위", name: "다목적회의실", net: 132.00, pub: 13.20, flex: "가변 시설", reason: "★지침 복귀: 선거창고와 인접성 확보 지침 준수를 위해 1층 복귀. (일반공용 10% 적용)" },
+            { category: "선관위", name: "문서고", net: 5.50, pub: 0.55, flex: "가변 시설", reason: "★지침 복귀: 1층 선거지원 관리 및 교육 연계를 위해 1층 배치. (일반공용 10% 적용)" },
+            { category: "선관위", name: "창고", net: 5.50, pub: 0.55, flex: "가변 시설", reason: "★지침 복귀: 1층 다목적회의실 비품 보관을 위한 1층 배치. (일반공용 10% 적용)" },
+            { category: "편익", name: "부대편익시설 A (제2종 근생)", net: 190.00, pub: 19.00, flex: "고정 시설", reason: "★지상 필수적용: 주민 친화적 대민 근생 가로변 활성화를 위해 1층 적용. (일반공용 10% 적용)" },
+            { category: "경찰", name: "정문안내소", net: 15.00, pub: 1.50, flex: "고정 시설", reason: "차량 및 출입자 종합 통제를 위한 입구 고정. (일반공용 10% 적용)" },
+            { category: "경찰", name: "청소관리용역 사무실", net: 18.00, pub: 1.80, flex: "가변 시설", reason: "1층 대민 청사 미화 지원을 위한 최소 면적 조닝. (일반공용 10% 적용)" },
+            { category: "경찰", name: "[제안] 1F 통합 민원현관 완충실", net: 2.64, pub: 0.26, flex: "제안 시설", reason: "로비 출입 통제용 차단 스피드게이트 전면 완충 공간. (일반공용 10% 적용)" },
+            { category: "공통", name: "수직 관통 코어 고정 면적 (보안 코어 포함)", net: 0.00, pub: 300.00, flex: "고정 시설", reason: "수직 코어 상수 (경찰 전용 2개소 180.00㎡ + 코어 A 80.00㎡ + 피의자 보안코어 40.00㎡)" },
+            { category: "공통", name: "지상 옥외주차장", net: 476.00, pub: 186.85, flex: "고정 시설", reason: "지상 옥외 공간으로 건물 실내 GFA 1,206㎡ 제한에서 분리 산정. (공용률 39.25% 준용)" }
+        ],
+        guidelines: [
+            "선거물품 수평 연계: 1층 선거창고와 다목적회의실이 수평 평면 상에서 인접 구획되어 선거 장비 검수 동선의 수평화 실현.",
+            "대민 교통/민원 특화: 대민 빈도가 높은 부서들을 1층에 올인하여 시민 중심 무장애 환경 조성."
+        ]
+    },
+    "B1F": {
+        title: "지하 1층 (B1F)",
+        concept: "지하 물류 창고 집약 및 즉결유실물보관실 이관 배치 [GFA 4303 밸런싱]",
+        facilities: [
+            { category: "공통", name: "지하 옥내주차장 (B1F 메인)", net: 2000.00, pub: 785.07, flex: "고정 시설", reason: "법정 차로 및 주차 구획을 반영한 표준 주차 라인." },
+            { category: "경찰", name: "수사+과학수사 창고", net: 137.00, pub: 53.78, flex: "고정 시설", reason: "1.2t/㎡ 슬래브 적재 하중 및 방습 보강이 적용된 지하 창고 배치." },
+            { category: "경찰", name: "문서고", net: 121.00, pub: 47.50, flex: "가변 시설", reason: "경찰서 장기 보존 서고로서 코어 직결 지하층에 배치." },
+            { category: "경찰", name: "비품창고", net: 121.00, pub: 47.50, flex: "가변 시설", reason: "비품 반출입 효율 향상을 위해 하역 엘리베이터 연접 배치." },
+            { category: "경찰", name: "소모품창고", net: 121.00, pub: 47.50, flex: "가변 시설", reason: "전체 소모성 자재 통합 보관 공간." },
+            { category: "경찰", name: "피복창고", net: 60.40, pub: 23.71, flex: "가변 시설", reason: "피복 보존에 유리한 항온항습 구획 적용." },
+            { category: "경찰", name: "경무 (문서보관실)", net: 28.00, pub: 11.00, flex: "가변 시설", reason: "가동률이 낮은 장기 보관용 경무 문서고." },
+            { category: "경찰", name: "생활안전 (압수물/물품보관실)", net: 112.00, pub: 43.96, flex: "가변 시설", reason: "지하 하역 데크 및 화물용 승강기와 직결 연계한 적재 구역." },
+            { category: "경찰", name: "정보기록보관실", net: 74.00, pub: 29.05, flex: "가변 시설", reason: "3층 사법공조층 면적 조정을 위해 지하 고하중 지반 구역으로 이관." },
+            { category: "경찰", name: "즉결유실물보관실 (생활안전)", net: 15.00, pub: 5.89, flex: "가변 시설", reason: "★지하 1층 이관: 지하 2층 사격 통제 구역으로부터 상향 이관하여 보안성 및 민원 접근성 개선." },
+            { category: "공통", name: "[제안] 지하 주차통로 및 하역 완충실", net: 301.22, pub: 118.19, flex: "고정 시설", reason: "부대편익 지상 환원에 따른 B1F 잔여 면적 보정 및 차량 주행 차로 완충 공간." }
+        ],
+        guidelines: [
+            "유실물 접근성 확보: 즉결유실물보관실을 지하 1층 주차 동선 및 서비스 승강기 축에 가까이 배치하여 경찰 및 민원인 취급 용이성 도모.",
+            "고하중 적재 보강: 서고 및 대형 비품창고 영역은 1.2ton/㎡의 특수 슬래브 설계 공법 적용."
+        ]
+    },
+    "B2F": {
+        title: "지하 2층 (B2F)",
+        concept: "지반 매립 구조를 이용한 소음/진동 배제 및 특수 보안 구획",
+        facilities: [
+            { category: "경찰", name: "사격장", net: 464.00, pub: 182.14, flex: "고정 시설", reason: "완벽한 소음 및 방진 제어를 위해 지하 2층 종단 구역에 고정." },
+            { category: "경찰", name: "무기, 탄약 (수납 종합)", net: 120.00, pub: 47.10, flex: "고정 시설", reason: "사격장 연동 및 피탈/도난 원천 방지용 인접 배치." },
+            { category: "공통", name: "기계실 / 전기실", net: 1000.00, pub: 392.54, flex: "고정 시설", reason: "건물 전체 기계/전기 공급 기반 및 대형 설비 하중 분산." },
+            { category: "공통", name: "지하 옥내주차장 (일부)", net: 1280.00, pub: 502.45, flex: "고정 시설", reason: "기초 파일 연동형 표준 옥내 주차." },
+            { category: "공통", name: "[제안] 지하 2층 기계실 보조/완충 통로", net: 15.00, pub: 5.89, flex: "고정 시설", reason: "즉결유실물보관실 B1F 이관에 따른 지하 2층 장비 반입 완충 면적 보정." }
+        ],
+        guidelines: [
+            "권총사격장 사대: 유효 조준거리 25m 확보 및 방탄 차단벽 통제실 구축.",
+            "진동 차폐 공법: 사격장 구조 벽체를 본청 기초와 진동 흡수재로 격리하는 차폐 공법 적용.",
+            "무기고 보완: 두께 200mm 철근콘크리트 옹벽 및 3.2mm 강판 덧씌움 특수 보안 시공."
+        ]
+    }
+};
+
+const allocationData = [
+    { label: '기관장 서장실 (1명)', area: 80, pub: 31.4 },
+    { label: '경정급 과장실 (8명)', area: 240, pub: 94.2 },
+    { label: '수사/형사과 직원 (65명)', area: 650, pub: 255.1 },
+    { label: '여청/교통 직원 (40명)', area: 400, pub: 157.0 },
+    { label: '경무/범방/정보 직원 (50명)', area: 358, pub: 140.5 }
+];
+
+let buildingStackChartInstance = null;
+let floorDonutChartInstance = null;
+let allocationBarChartInstance = null;
+
+// Chart.js 다크모드 공통 설정
+Chart.defaults.color = '#8a8f98';
+Chart.defaults.borderColor = '#23252a';
+Chart.defaults.font.family = 'Inter';
+
+function initCharts() {
+    const stackCtx = document.getElementById('buildingStackChart').getContext('2d');
+    buildingStackChartInstance = new Chart(stackCtx, {
+        type: 'bar',
+        data: {
+            labels: ['6F', '5F', '4F', '3F', '2F', '1F', 'B1F', 'B2F'],
+            datasets: [
+                {
+                    label: '전용면적 (Net Area)',
+                    data: [1154.55, 1154.55, 1154.55, 1154.55, 823.64, 823.64, 3090.62, 2879.00], 
+                    backgroundColor: '#5e6ad2'
+                },
+                {
+                    label: '공용면적 (Public Area)',
+                    data: [375.45, 375.45, 375.45, 375.45, 382.36, 382.36, 1213.19, 1129.19], 
+                    backgroundColor: 'rgba(94, 106, 210, 0.15)'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            scales: {
+                x: {
+                    stacked: true,
+                    grid: { color: '#23252a' },
+                    ticks: { color: '#8a8f98', font: { family: 'JetBrains Mono', size: 10 } }
+                },
+                y: {
+                    stacked: true,
+                    grid: { color: '#23252a' },
+                    ticks: { color: '#8a8f98', font: { family: 'JetBrains Mono', size: 10 } }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    backgroundColor: '#141516',
+                    titleColor: '#f7f8f8',
+                    bodyColor: '#f7f8f8',
+                    borderColor: '#34343a',
+                    borderWidth: 1,
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': ' + context.parsed.x.toLocaleString() + ' m²';
+                        }
+                    }
+                },
+                legend: {
+                    position: 'bottom',
+                    labels: { color: '#d0d6e0', font: { size: 11 } }
+                }
+            }
+        }
+    });
+
+    const allocCtx = document.getElementById('allocationBarChart').getContext('2d');
+    allocationBarChartInstance = new Chart(allocCtx, {
+        type: 'bar',
+        data: {
+            labels: allocationData.map(d => d.label),
+            datasets: [
+                {
+                    label: '전용 배분면적 (m²)',
+                    data: allocationData.map(d => d.area),
+                    backgroundColor: '#7a7fad'
+                },
+                {
+                    label: '공용 배분면적 (m²)',
+                    data: allocationData.map(d => d.pub),
+                    backgroundColor: 'rgba(122, 127, 173, 0.15)'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    stacked: true,
+                    grid: { color: '#23252a' },
+                    ticks: { color: '#8a8f98', font: { size: 11 } }
+                },
+                y: {
+                    stacked: true,
+                    beginAtZero: true,
+                    grid: { color: '#23252a' },
+                    ticks: { color: '#8a8f98', font: { family: 'JetBrains Mono', size: 10 } }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    backgroundColor: '#141516',
+                    borderColor: '#34343a',
+                    borderWidth: 1
+                },
+                legend: {
+                    position: 'bottom',
+                    labels: { color: '#d0d6e0' }
+                }
+            }
+        }
+    });
+
+    const donutCtx = document.getElementById('floorDonutChart').getContext('2d');
+    floorDonutChartInstance = new Chart(donutCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['전용면적합', '공용면적합'],
+            datasets: [{
+                data: [0, 0],
+                backgroundColor: ['#5e6ad2', 'rgba(94, 106, 210, 0.2)'],
+                borderColor: '#23252a',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        boxWidth: 8,
+                        color: '#d0d6e0',
+                        font: { size: 9, family: 'Inter' }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: '#141516',
+                    borderColor: '#34343a',
+                    borderWidth: 1
+                }
+            }
+        }
+    });
+}
+
+function renderFloor(floorKey) {
+    const data = zoningData[floorKey];
+    
+    document.getElementById('current-floor-title').innerText = data.title;
+    document.getElementById('current-floor-concept').innerText = data.concept;
+
+    const btns = document.querySelectorAll('.floor-btn');
+    btns.forEach(btn => {
+        if(btn.dataset.floor === floorKey) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+
+    const tbody = document.getElementById('floor-table-body');
+    tbody.innerHTML = '';
+    
+    let totalNet = 0;
+    let totalPub = 0;
+
+    data.facilities.forEach(fac => {
+        const subTotal = fac.net + fac.pub;
+        totalNet += fac.net;
+        totalPub += fac.pub;
+
+        let badgeClass = 'badge-flexible';
+        if(fac.flex.includes('고정')) badgeClass = 'badge-fixed';
+        if(fac.flex.includes('제한')) badgeClass = 'badge-semi';
+        if(fac.flex.includes('제안')) badgeClass = 'badge-proposal';
+
+        let categoryColor = 'color-common';
+        if (fac.category === '경찰') categoryColor = 'color-police';
+        else if (fac.category === '선관위') categoryColor = 'color-nec';
+        else if (fac.category === '편익') categoryColor = 'color-amenity';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td class="${categoryColor}">${fac.category}</td>
+            <td style="font-weight: 600; color: var(--color-ink);">${fac.name}</td>
+            <td style="text-align: right;" class="font-mono">${fac.net.toFixed(2).toLocaleString()} m²</td>
+            <td style="text-align: right; color: var(--color-ink-subtle);" class="font-mono">${fac.pub.toFixed(2).toLocaleString()} m²</td>
+            <td style="text-align: right; background-color: rgba(255,255,255,0.005); font-weight: 700; color: var(--color-primary-hover);" class="font-mono">${subTotal.toFixed(2).toLocaleString()} m²</td>
+            <td style="text-align: center;"><span class="badge ${badgeClass}">${fac.flex}</span></td>
+            <td style="color: var(--color-ink-subtle); line-height: 1.4; max-width: 380px;">${fac.reason}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    // Sum Row
+    const totalRow = document.createElement('tr');
+    totalRow.className = "sum-row";
+    totalRow.innerHTML = `
+        <td style="text-align: center;" colspan="2">해당 층 면적 합계 (GFA)</td>
+        <td style="text-align: right;" class="font-mono">${totalNet.toFixed(2).toLocaleString()} m²</td>
+        <td style="text-align: right;" class="font-mono">${totalPub.toFixed(2).toLocaleString()} m²</td>
+        <td style="text-align: right; color: var(--color-semantic-success); font-size: 13px;" class="font-mono">${(totalNet + totalPub).toFixed(2).toLocaleString()} m²</td>
+        <td style="text-align: center;" colspan="2"><span style="font-size: 10px; color: var(--color-semantic-success); font-weight: 700; text-transform: uppercase;">VERIFIED</span></td>
+    `;
+    tbody.appendChild(totalRow);
+
+    // Update Donut Chart
+    floorDonutChartInstance.data.datasets[0].data = [parseFloat(totalNet.toFixed(2)), parseFloat(totalPub.toFixed(2))];
+    floorDonutChartInstance.update();
+
+    // Injects Guidelines
+    const gContainer = document.getElementById('special-guidelines-container');
+    const gList = document.getElementById('special-guidelines-list');
+    if (data.guidelines && data.guidelines.length > 0) {
+        gContainer.style.display = 'block';
+        gList.innerHTML = data.guidelines.map(g => `<p style="margin-bottom: 4px;">• ${g}</p>`).join('');
+    } else {
+        gContainer.style.display = 'none';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initCharts();
+
+    const floorContainer = document.getElementById('floor-buttons');
+    const floorsOrder = ["6F", "5F", "4F", "3F", "2F", "1F", "B1F", "B2F"];
+    
+    floorsOrder.forEach(key => {
+        const btn = document.createElement('button');
+        btn.dataset.floor = key;
+        btn.className = 'floor-btn';
+        btn.innerText = key;
+        btn.addEventListener('click', () => renderFloor(key));
+        floorContainer.appendChild(btn);
+    });
+
+    // Default load 1F
+    renderFloor('1F');
+});
+</script>
+</body>
+</html>
