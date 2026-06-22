@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>나라키움 부산영도통합청사 세부조닝 대시보드</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<!-- Anti System / Linear-style Void-Black Glassmorphism -->
+<style>
+:root {
+    /* Color Palette from manual.html */
+    --color-primary: #5e6ad2;
+    --color-primary-hover: #828fff;
+    --color-primary-focus: #5e69d1;
+    --color-on-primary: #ffffff;
+    
+    --color-canvas: #010102;
+    --color-surface-1: #0f1011;
+    --color-surface-2: #141516;
+    --color-surface-3: #18191a;
+    --color-surface-4: #191a1b;
+    
+    --color-hairline: #23252a;
+    --color-hairline-strong: #34343a;
+    
+    --color-ink: #f7f8f8;
+    --color-ink-muted: #d0d6e0;
+    --color-ink-subtle: #8a8f98;
+    
+    --color-semantic-success: #27a644;
+    --color-semantic-error: #ff4444;
+    --color-semantic-warning: #f59e0b;
+    
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-text: 'Inter', sans-serif;
+    
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-pill: 9999px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    font-family: var(--font-text);
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+}
+
+/* Decorative background grid and glow */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.012) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.012) 1px, transparent 1px);
+    background-size: 60px 60px;
+    z-index: -1;
+    pointer-events: none;
+}
+
+body::after {
+    content: "";
+    position: fixed;
+    top: -20%; right: -10%; width: 50%; height: 50%;
+    background: radial-gradient(circle, rgba(94, 106, 210, 0.05) 0%, transparent 75%);
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* Header styling */
+.top-nav {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: 64px;
+    background: rgba(1, 1, 2, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--color-hairline);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.brand-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: var(--color-primary);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 0 12px rgba(94, 106, 210, 0.4);
+    font-size: 16px;
+}
+
+.brand-name {
+    font-family: 'Outfit', sans-serif;
+    font-size: 15px;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-ink);
+}
+
+.brand-sub {
+    font-size: 11px;
+    color: var(--color-ink-subtle);
+    font-weight: 500;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: var(--color-surface-2);
+    color: var(--color-ink-muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    border-radius: var(--radius-pill);
+    padding: 4px 12px;
+    border: 1px solid var(--color-hairline);
+}
+
+.status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--color-semantic-success);
+    box-shadow: 0 0 8px var(--color-semantic-success);
+}
+
+/* Main Container Layout */
+.container {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 32px 24px;
+}
+
+.hero-section {
+    margin-bottom: 32px;
+}
+
+.hero-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--color-primary);
+    margin-bottom: 8px;
+}
+
+.hero-title {
+    font-size: 36px;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    margin-bottom: 12px;
+    background: linear-gradient(to right, var(--color-ink) 50%, var(--color-ink-muted) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-desc {
+    font-size: 14px;
+    color: var(--color-ink-subtle);
+    max-width: 800px;
+    line-height: 1.6;
+}
+
+/* Layout Grid and Cards */
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+@media (min-width: 992px) {
+    .grid-2 {
+        grid-template-columns: 1.1fr 0.9fr;
+    }
+}
+
+.stack-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.glass-card {
+    background-color: var(--color-surface-1);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    position: relative;
+}
+
+.card-title {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.card-desc {
+    font-size: 13px;
+    color: var(--color-ink-subtle);
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+/* Styling Principles Box */
+.principles-box {
+    background-color: rgba(94, 106, 210, 0.03);
+    border-left: 3px solid var(--color-primary);
+    border-right: 1px solid var(--color-hairline);
+    border-top: 1px solid var(--color-hairline);
+    border-bottom: 1px solid var(--color-hairline);
+    border-radius: var(--radius-md);
+    padding: 18px;
+    margin-bottom: 20px;
+}
+
+.principles-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-primary-hover);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.principles-list {
+    font-size: 12px;
+    color: var(--color-ink-muted);
+    list-style-type: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-family: var(--font-mono);
+}
+
+.principles-list li strong {
+    color: var(--color-ink);
+}
+
+/* Floor toggle buttons */
+.btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.floor-btn {
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-hairline);
+    color: var(--color-ink-subtle);
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.floor-btn:hover {
+    color: var(--color-ink);
+    border-color: var(--color-hairline-strong);
+    background-color: var(--color-surface-3);
+}
+
+.floor-btn.active {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 12px rgba(94, 106, 210, 0.35);
+}
+
+/* Table Design mimicking manual.html styles */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface-2);
+    margin-bottom: 24px;
+}
+
+.zoning-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    text-align: left;
+}
+
+.zoning-table th {
+    background-color: var(--color-surface-3);
+    color: var(--color-ink-subtle);
+    font-weight: 600;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--color-hairline-strong);
+}
+
+.zoning-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--color-hairline);
+    color: var(--color-ink-muted);
+}
+
+.zoning-table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.015);
+}
+
+.zoning-table font-mono {
+    font-family: var(--font-mono);
+}
+
+/* Table Footer Sum row */
+.zoning-table tr.sum-row td {
+    background-color: rgba(94, 106, 210, 0.05);
+    font-weight: 700;
+    color: var(--color-ink);
+    border-top: 1px solid var(--color-hairline-strong);
+    border-bottom: none;
+}
+
+/* Badges for flexibility */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: var(--radius-pill);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.badge-fixed {
+    background-color: rgba(255, 68, 68, 0.08);
+    color: var(--color-semantic-error);
+    border: 1px solid rgba(255, 68, 68, 0.2);
+}
+
+.badge-flexible {
+    background-color: rgba(94, 106, 210, 0.08);
+    color: var(--color-primary-hover);
+    border: 1px solid rgba(94, 106, 210, 0.2);
+}
+
+.badge-proposal {
+    background-color: rgba(39, 166, 68, 0.08);
+    color: var(--color-semantic-success);
+    border: 1px solid rgba(39, 166, 68, 0.2);
+}
+
+.badge-semi {
+    background-color: rgba(245, 158, 11, 0.08);
+    color: var(--color-semantic-warning);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+/* Dynamic Text colors */
+.color-police { color: #828fff; font-weight: 600; }
+.color-nec { color: var(--color-semantic-warning); font-weight: 600; }
+.color-amenity { color: var(--color-semantic-success); font-weight: 600; }
+.color-common { color: var(--color-ink-subtle); }
+
+/* Guidelines Box */
+.guideline-container {
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-top: 20px;
+}
+
+.guideline-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-semantic-warning);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.guideline-list {
+    font-size: 12px;
+    color: var(--color-ink-muted);
+    padding-left: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* Chart Styles */
+.chart-card-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    height: 320px;
+    margin-top: 16px;
+}
+
+.chart-footer-note {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-ink-subtle);
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    margin-top: 16px;
+    line-height: 1.5;
+}
+
+/* Floor Detail layout */
+.floor-detail-header {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--color-hairline);
+    padding-bottom: 16px;
+    margin-bottom: 20px;
+    gap: 12px;
+}
+
+@media (min-width: 768px) {
+    .floor-detail-header {
+        flex-direction: row;
+        align-items: center;
+    }
+}
+
+.floor-title-group h3 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--color-ink);
+}
+
+.floor-title-group p {
+    font-size: 12px;
+    color: var(--color-ink-subtle);
+    margin-top: 4px;
+}
+
+.donut-chart-box {
+    width: 220px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-hairline);
+    padding: 8px;
+    border-radius: var(--radius-md);
+}
+
+
+/* Stat Cards Grid */
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.stat-card {
+    background-color: var(--color-surface-1);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-md);
+    padding: 16px 20px;
+    box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--color-hairline-strong);
+}
+
+.stat-card-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-ink-subtle);
+    margin-bottom: 6px;
+}
+
+.stat-card-val {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--color-ink);
+    font-family: var(--font-mono);
+}
+
+.stat-card-sub {
+    font-size: 11px;
+    color: var(--color-ink-subtle);
+    margin-top: 4px;
+}
+
+.stat-card-sub strong {
+    color: var(--color-ink);
+}
+
+
+/* Group Divider and Header Styling */
+.zoning-table tr.group-divider td {
+    background-color: transparent !important;
+    border: none !important;
+}
+.zoning-table tr.group-header td {
+    border-bottom: 1px solid var(--color-hairline-strong) !important;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+    <div class="brand">
+        <div class="brand-logo">🏛️</div>
+        <div>
+            <span class="brand-name">나라키움 부산영도통합청사</span>
+            <div class="brand-sub">설계공모 세부조닝 & 1층 축소-상부확장형 주차 극대화 대시보드</div>
+        </div>
+    </div>
+    <div class="status-badge">
+        <div class="status-dot"></div>
+        <span>INTEGRATED ZONING v4.0 (Scenario A-4: Reduced Core Reconciled)</span>
+    </div>
+</nav>
+
+<main class="container">
+
+
+    <!-- STAT CARDS SECTION -->
+    <section class="stat-grid">
+        <div class="stat-card" style="border-left: 3px solid var(--color-primary);">
+            <div class="stat-card-title">🏢 통합청사 총 GFA (연면적)</div>
+            <div class="stat-card-val" id="stat-total-gfa">—</div>
+            <div class="stat-card-sub" id="stat-gfa-sub">지상 옥외주차장 제외 계산 중...</div>
+        </div>
+        <div class="stat-card" style="border-left: 3px solid #828fff;">
+            <div class="stat-card-title">👮 영도경찰서 전용 총합</div>
+            <div class="stat-card-val" id="stat-police-net">—</div>
+            <div class="stat-card-sub" id="stat-police-sub">지하층 + 지상층 합산</div>
+        </div>
+        <div class="stat-card" style="border-left: 3px solid #f59e0b;">
+            <div class="stat-card-title">🗳️ 영도구선관위 전용 총합</div>
+            <div class="stat-card-val" style="color: #f59e0b;" id="stat-nec-net">—</div>
+            <div class="stat-card-sub" id="stat-nec-sub">1층 + 2층 분할 배치</div>
+        </div>
+        <div class="stat-card" style="border-left: 3px solid #64748b;">
+            <div class="stat-card-title">🚗 주차 공간 구성 (옥외 분리)</div>
+            <div class="stat-card-val">지하 옥내 3,047㎡</div>
+            <div class="stat-card-sub">B1F <strong>2,000㎡</strong> + B2F <strong>1,047㎡</strong> / 지상 옥외 <strong>476㎡(27대)</strong> 별도</div>
+        </div>
+    </section>
+
+    <!-- HERO SECTION -->
+    <section class="hero-section">
+        <div class="hero-eyebrow">Project Design Analysis</div>
+        <h1 class="hero-title">나라키움 부산영도통합청사 세부 조닝 검증 대시보드</h1>
+        <p class="hero-desc">
+            과업내용서 pp.30-31 필수 시설 전수 정합 완료 조닝안입니다. 숙직실 등 지침 외 항목 제거, 통신장비실(40㎡)/전산장비실(50㎡) 분리, 과장급(경정) 240㎡ 완전 배치(4F 120+5F 120) 반영. B1F 창고류 전량 상층 이관(3F·4F·1F)으로 지하 주차면적 극대화, 전 층 3,000㎡ 이하(대지 3,293㎡ 이격 준수), 기계·전기실 523.2㎡(연면적 4%) 적용 완료.
+        </p>
+    </section>
+
+    <!-- SECTION 1: 전체 매스 구성 및 차트 -->
+    <section class="stack-layout">
+        <!-- Left: Principle Info -->
+        <div class="glass-card">
+            <h2 class="card-title">🛡️ 공간 분류 원칙 및 전체 건물 구성</h2>
+            <p class="card-desc">
+                질의회신 답변서 확정 및 과업내용서 지침에 따라 고정 배치 시설을 전수 조정하고, B1F 창고류를 상층으로 이관하여 지하 주차면적을 극대화한 최종 조닝안입니다.
+            </p>
+
+            <div class="principles-box">
+                <h3 class="principles-title">💡 최종 고정 조닝 정렬 핵심 요약</h3>
+                <ul class="principles-list">
+                    <li>• <strong>형사과 특수시설 1층 고정 (157㎡)</strong>: ★질의회신(순번10) 확정 — 전산조회실·수사상담·청문민원상담, 민원실(160㎡) 기준 ±3% 내 적정</li>
+                    <li>• <strong>교통과 1층 고정 (85㎡)</strong>: ★질의회신(순번10) 확정 — 교통조사실 포함, 순사무실 10㎡/명 기준 준용</li>
+                    <li>• <strong>수사과 2층 고정 (380㎡)</strong>: 과업내용서 지침 고정 시설, 유치장(384㎡)과 동층 배치로 계호 효율 극대화</li>
+                    <li>• <strong>피의자·참고인 대기실 + 진술녹화 2층 고정</strong>: ★질의회신 확정 — 대기실 90㎡, 진술녹화실 55㎡, 모니터실 50㎡ (과업내용서 p.30 기준)</li>
+                    <li>• <strong>선관위 1~2층 분할 수용</strong>: 1층 207㎡(문서고·물품창고 75 + 다목적회의실 132) / 2층 209㎡(사무실·위원회·조사실·공정선거지원단 등)</li>
+                    <li>• <strong>부대편익시설 1층 고정 (427㎡)</strong>: 지역주민 개방형 2종 근생시설, 1층 가로변 고정 조닝</li>
+                    <li>• <strong>과장급(경정) 순사무실 240㎡ (8개소×30㎡)</strong>: 과업내용서 p.30 지침 — 4F 4개소(120㎡) + 5F 4개소(120㎡) 분산 배치 완료</li>
+                    <li>• <strong>B1F 창고류 전량 상층 이관</strong>: 문서고·비품·소모품·피복·생활안전·정보기록·경비장비 → 3F / 경무문서보관실 → 4F / 즉결유실물 → 1F (지하 주차 극대화)</li>
+                </ul>
+            </div>
+
+            <div class="principles-box" style="background-color: rgba(255, 255, 255, 0.015); border-left-color: var(--color-ink-subtle);">
+                <h3 class="principles-title" style="color: var(--color-ink-muted);">⚙️ 수직 코어 면적 고정 상수</h3>
+                <ul class="principles-list" style="color: var(--color-ink-subtle);">
+                    <li>• <strong>지상 1F~2F 코어 면적: 219.00 ㎡</strong> (경찰 전용 141 + 공용 코어 A 43 + 피의자 보안코어 35)</li>
+                    <li>• <strong>지상 3F~6F 및 지하 B1F~B2F 코어 면적: 184.00 ㎡</strong> (경찰 전용 141 + 공용 코어 A 43)</li>
+                    <li>• <strong>일반 공용 산출 비율</strong>: 1~2F <strong>5%</strong> / 3~6F <strong>10%</strong> / 지하 주차장 <strong>39.25%</strong> / 지하 비주차시설(사격장·무기탄약·기계전기실·창고) <strong>10%</strong></li>
+                    <li>• <strong>기계·전기실</strong>: 연면적 4% 기준 적용 → 13,079.25 × 4% = 523.17㎡ (B2F 고정)</li>
+                    <li>• <strong>전 층 면적 상한</strong>: 대지 3,293㎡, 이격거리 반영 3,000㎡ 이하 준수 완료</li>
+                </ul>
+            </div>
+
+            <div class="principles-box" style="background-color: rgba(99, 102, 241, 0.05); border-left-color: var(--color-brand-primary);">
+                <h3 class="principles-title" style="color: var(--color-brand-light);">👥 부서별 인원 산정 및 면적 배분 논리</h3>
+                <div style="font-size: 0.82rem; line-height: 1.5; color: var(--color-ink-base); margin-top: 10px;">
+                    <p style="margin-bottom: 8px; font-weight: 600;">1. 경찰서 정원 (172명) 기준 과별 인원 추산 및 면적 산정</p>
+                    <ul style="padding-left: 15px; margin-bottom: 12px; color: var(--color-ink-muted);">
+                        <li>• <strong>공식</strong>: <code>과별 면적 = (과장 1명 × 30㎡) + (수사조사 인원 × 10㎡) + (행정기타 인원 × 7㎡)</code></li>
+                        <li>• 서장실은 기관장 기준 단독 80㎡(4F)로 고정 배치합니다.</li>
+                        <li>• 각 과장실(30㎡)은 분리하지 않고 해당 과 순사무실 면적 내에 묶음 배치합니다.</li>
+                    </ul>
+                    
+                    <div style="overflow-x: auto; margin-bottom: 12px; border: 1px solid var(--color-hairline); border-radius: var(--radius-sm);">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 0.78rem; text-align: center;">
+                            <thead>
+                                <tr style="background-color: rgba(255, 255, 255, 0.03); border-bottom: 1px solid var(--color-hairline); color: var(--color-brand-light);">
+                                    <th style="padding: 6px; border-right: 1px solid var(--color-hairline);">부서명</th>
+                                    <th style="padding: 6px; border-right: 1px solid var(--color-hairline);">과장 (명)</th>
+                                    <th style="padding: 6px; border-right: 1px solid var(--color-hairline);">수사/조사 (명)</th>
+                                    <th style="padding: 6px; border-right: 1px solid var(--color-hairline);">행정/기타 (명)</th>
+                                    <th style="padding: 6px;">전용면적 (㎡)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="border-bottom: 1px solid var(--color-hairline); background-color: rgba(255,255,255,0.01);">
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline); font-weight: 600;">서장실 (4F)</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline); color: var(--color-ink-subtle);">-</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline); color: var(--color-ink-subtle);">-</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline); font-weight: 600;">1 (서장)</td>
+                                    <td style="padding: 6px; font-weight: 600; color: var(--color-brand-light);">80.00</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid var(--color-hairline);">
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline); font-weight: 600;">경무과 (4F)</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline);">1</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline); color: var(--color-ink-subtle);">0</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline);">18</td>
+                                    <td style="padding: 6px; font-weight: 600; color: var(--color-brand-light);">156.00</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid var(--color-hairline); background-color: rgba(255,255,255,0.01);">
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline); font-weight: 600;">범죄예방대응과 (4F)</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline);">1</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline); color: var(--color-ink-subtle);">0</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline);">16</td>
+                                    <td style="padding: 6px; font-weight: 600; color: var(--color-brand-light);">142.00</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid var(--color-hairline);">
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline); font-weight: 600;">수사과 (2F)</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline);">1</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline); font-weight: 600; color: var(--color-semantic-warning);">31</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline);">0</td>
+                                    <td style="padding: 6px; font-weight: 600; color: var(--color-brand-light);">340.00</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid var(--color-hairline); background-color: rgba(255,255,255,0.01);">
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline); font-weight: 600;">형사과 (3F)</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline);">1</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline); font-weight: 600; color: var(--color-semantic-warning);">32</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline);">1</td>
+                                    <td style="padding: 6px; font-weight: 600; color: var(--color-brand-light);">357.00</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid var(--color-hairline);">
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline); font-weight: 600;">교통과 (1F)</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline);">1</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline); font-weight: 600; color: var(--color-semantic-warning);">14</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline);">10</td>
+                                    <td style="padding: 6px; font-weight: 600; color: var(--color-brand-light);">240.00</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid var(--color-hairline); background-color: rgba(255,255,255,0.01);">
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline); font-weight: 600;">여성청소년과 (3F)</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline);">1</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline); font-weight: 600; color: var(--color-semantic-warning);">12</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline);">4</td>
+                                    <td style="padding: 6px; font-weight: 600; color: var(--color-brand-light);">178.00</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid var(--color-hairline);">
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline); font-weight: 600;">정보과 (5F)</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline);">1</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline); color: var(--color-ink-subtle);">0</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline);">10</td>
+                                    <td style="padding: 6px; font-weight: 600; color: var(--color-brand-light);">100.00</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid var(--color-hairline); background-color: rgba(255,255,255,0.01);">
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline); font-weight: 600;">경비과 (5F)</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline);">1</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline); color: var(--color-ink-subtle);">0</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline);">8</td>
+                                    <td style="padding: 6px; font-weight: 600; color: var(--color-brand-light);">86.00</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid var(--color-hairline);">
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline); font-weight: 600;">청문과 (5F)</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline); color: var(--color-ink-subtle);">0</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline); color: var(--color-ink-subtle);">0</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline);">7</td>
+                                    <td style="padding: 6px; font-weight: 600; color: var(--color-brand-light);">49.00</td>
+                                </tr>
+                                <tr style="background-color: rgba(99,102,241,0.15); font-weight: 700; color: var(--color-brand-light);">
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline);">경찰 총계</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline);">8</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline);">89</td>
+                                    <td style="padding: 6px; border-right: 1px solid var(--color-hairline);">75 (서장 1 포함)</td>
+                                    <td style="padding: 6px; color: var(--color-semantic-success);">1,728.00</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <p style="margin-bottom: 8px; font-weight: 600; margin-top: 16px;">2. 선관위 전용면적 (416.00 ㎡) 산정 기준</p>
+                    <ul style="padding-left: 15px; margin-bottom: 12px; color: var(--color-ink-muted);">
+                        <li>• 선관위 사무실(사무국장/직원/정원외) <strong>79.00 ㎡</strong> (2F 배치)</li>
+                        <li>• 선거관련 물품창고 <strong>75.00 ㎡</strong> (1F 배치, 5톤 하역동선 확보 필수)</li>
+                        <li>• 다목적회의실 <strong>132.00 ㎡</strong> (1F 배치), 위원회의실 <strong>49.00 ㎡</strong> (2F 배치)</li>
+                        <li>• 공정선거지원단실 <strong>50.00 ㎡</strong>, 선거사범조사실 <strong>20.00 ㎡</strong>, 문서고/창고 <strong>11.00 ㎡</strong> (2F 배치)</li>
+                    </ul>
+
+                    <p style="margin-bottom: 8px; font-weight: 600; margin-top: 16px;">3. 조닝 및 동선 최적화 논리</p>
+                    <ul style="padding-left: 15px; color: var(--color-ink-muted);">
+                        <li>• <strong>식당(250㎡) 3층 하향 이관</strong>: 선관위(2층 상주) 직원의 수직 이동을 1개 층으로 최소화하여 2종 근생식당의 공용 가치를 높였습니다.</li>
+                        <li>• <strong>지하층 코어(각 184㎡) 반영</strong>: B1F 및 B2F에 관통 코어를 계상하여 기계/전기실 및 사격장으로의 연속적 피난 동선을 확보하였습니다.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Vertical Stack Chart -->
+        <div class="glass-card chart-card-wrapper">
+            <div>
+                <h2 class="card-title">📊 건물 전체 수직 매스 구성 (전용 vs 공용 m²)</h2>
+                <p class="card-desc">정원 비례 면적 재산정 및 지하층 수직 코어(각 184m²) 반영 후 GFA 분석 (1F 1,346.7 / 2F 1,251.2 / 3F 1,007.9 / 4F 977.1 / 5F 1,226.8 / 6F 1,110.9)</p>
+            </div>
+            <div class="chart-container">
+                <canvas id="buildingStackChart"></canvas>
+            </div>
+            <div class="chart-footer-note">
+                <strong>💡 분석 노트:</strong> 경찰 정원 172명 기준 순사무실 1,728m² 매트릭스를 완벽히 정합하고, 지하 1F/2F에 수직 코어(각 184m²)를 추가 계상한 최종 정합본입니다. 중복 가산되던 4F 과장실 단독 항목(120m²) 및 5F 예비 보정 오피스(44m²)를 전면 제거하여, 최종 통합 연면적은 <strong>13,079.25 m²</strong>로 지침 한도(13,485.00 m² 이하)를 매우 안정적으로 만족합니다.
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 2: 층별 조닝 탐색기 -->
+    <section class="glass-card">
+        <h2 class="card-title">🔍 층별 세부 조닝 및 유연성 탐색기 (질의회신·과업내용서 지침 전수 반영)</h2>
+        <p class="card-desc">아래의 층수 버튼을 클릭하면 해당 층의 상세 시설 구성, 전용/공용 비율, 법적 고정 여부 및 조닝 설명서가 실시간 출력됩니다.</p>
+        
+        <div class="btn-group" id="floor-buttons">
+            <!-- Buttons dynamically generated -->
+        </div>
+
+        <div class="glass-card" style="background-color: var(--color-surface-2); padding: 20px; border-color: var(--color-hairline-strong);">
+            <div class="floor-detail-header">
+                <div class="floor-title-group">
+                    <h3 id="current-floor-title">지상 1층 (1F)</h3>
+                    <p id="current-floor-concept">교통·민원 및 교통과 전체 1층 상주 구역 [대민 행정, 부대편익 및 교통과 전체 상주 층]</p>
+                </div>
+                <div class="donut-chart-box">
+                    <canvas id="floorDonutChart"></canvas>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="zoning-table">
+                    <thead>
+                        <tr>
+                            <th>구분</th>
+                            <th>세부 시설명</th>
+                            <th style="text-align: right;">전용면적</th>
+                            <th style="text-align: right;">전용 -3%</th>
+                            <th style="text-align: right; background-color: rgba(94, 106, 210, 0.03);">전용 +3%</th>
+                            <th style="text-align: center;">유연성 분류</th>
+                            <th>판정 사유 및 세부 조닝 지침</th>
+                        </tr>
+                    </thead>
+                    <tbody id="floor-table-body">
+                        <!-- Table content dynamically injected -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="special-guidelines-container" class="guideline-container">
+                <div class="guideline-title">⚠️ 과업내용서 세부 필수적용 지침</div>
+                <div class="guideline-list" id="special-guidelines-list">
+                    <!-- Guidelines dynamically injected -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 3: 순사무실 배분 매트릭스 -->
+    <section class="glass-card">
+        <h2 class="card-title">📊 순사무실 체적 배분 매트릭스 (전용+공용)</h2>
+        <p class="card-desc">경찰청 예규 및 과업내용서 기준에 따른 인원별 순사무실 면적(총 1,728 m²) 배분 검증</p>
+        <div class="chart-container" style="height: 380px;">
+            <canvas id="allocationBarChart"></canvas>
+        </div>
+    </section>
+
+</main>
+
+<script>
+const zoningData = {
+    "6F": {
+        title: "지상 6층 (6F)",
+        concept: "대강당 무기둥 트러스 대공간 수용 및 상무관 최상층 배치 구역 [최상층 특수 공간 수용 구역]",
+        facilities: [
+            { category: "경찰", name: "회의실 (대강당)", net: 400.00, pub: 40.00, flex: "고정 시설", reason: "장스팬 무주 공간 구조 형성을 위해 최상층 고정 필수. (일반공용 10% 적용)" },
+            { category: "경찰", name: "목욕실", net: 100.00, pub: 10.00, flex: "고정 시설", reason: "수조 하중 분산 및 방수 구획 목적 최상층 배치. (일반공용 10% 적용)" },
+            { category: "경찰", name: "상무관 (체력단련장)", net: 300.00, pub: 30.00, flex: "고정 시설", reason: "층고 확보가 필요한 대규모 체육시설로 6층 배치. (일반공용 10% 적용)" },
+            { category: "경찰", name: "직원휴게실 (남/여)", net: 42.60, pub: 4.26, flex: "고정 시설", reason: "과별/성별 분리 휴게실 확보 지침 준수. (일반공용 10% 적용)" },
+            { category: "공통", name: "수직 관통 코어 고정 면적", net: 0.00, pub: 184.00, flex: "고정 시설", reason: "축소 코어 상수 (경찰 전용 141.00㎡ + 코어 A 43.00㎡)" }
+        ],
+        guidelines: [
+            "대강당 무기둥 트러스: 장스팬(18m 이상) 구조를 위한 경량 철골 입체 트러스 계획 적용.",
+            "식당 하향 배치 반영: 식당이 3층으로 하향 조닝됨에 따라 6층의 누수 및 옥상 직결 부하가 대폭 경감됨.",
+            "목욕실 하부 회피: 5층 전산장비실의 상부 누수 위험 배제를 위해 수평 평면 상에서 전산실 위치와 어긋나게 조닝."
+        ]
+    },
+    "5F": {
+        title: "지상 5층 (5F)",
+        concept: "정보과, 경비과, 청문과 및 여성청소년과 행정 구역 [보안 및 일반/사법 행정 통합 구역]",
+        facilities: [
+            { category: "경찰", name: "정보과 순사무실", net: 100.00, pub: 10.00, flex: "고정 시설", reason: "정보과(과장 1명, 행정 10명) 정원 비례 면적 적용. (일반공용 10% 적용)" },
+            { category: "경찰", name: "정보화교육장", net: 75.00, pub: 7.50, flex: "고정 시설", reason: "장비 연계 및 보안 조닝을 위해 정보과와 같은 층 인접 배치 고정. (일반공용 10% 적용)" },
+            { category: "경찰", name: "통신/전산장비실", net: 90.00, pub: 9.00, flex: "제한적 가변", reason: "EPS/TPS 주간선 연결 축 인접 및 상부 목욕실 하부 완전 우회 배치. (일반공용 10% 적용)" },
+            { category: "경찰", name: "보안실", net: 33.00, pub: 3.30, flex: "가변 시설", reason: "전산 서버 보조 감시실로 서버실과 연계 배치. (일반공용 10% 적용)" },
+            { category: "경찰", name: "경찰 여성청소년과", net: 178.00, pub: 17.80, flex: "고정 시설", reason: "3층 복리시설 특화 층 조성에 따라 5층으로 이관된 여청과 순사무실. (일반공용 10% 적용)" },
+            { category: "경찰", name: "경찰 여청조사실", net: 40.00, pub: 4.00, flex: "고정 시설", reason: "3층에서 5층으로 이관된 아동/여성 피해자 보호 전용 조사실. (일반공용 10% 적용)" },
+            { category: "경찰", name: "경찰 소회의실 A", net: 52.00, pub: 5.20, flex: "가변 시설", reason: "3층에서 5층 여청과 및 정보부서 연계를 위해 이관 배치된 소회의실. (일반공용 10% 적용)" },
+            { category: "경찰", name: "회의실 (소회의실 C)", net: 52.00, pub: 5.20, flex: "가변 시설", reason: "경찰 내부 회의 및 세미나용 5층 소회의실. (일반공용 10% 적용)" },
+            { category: "경찰", name: "당직실", net: 160.00, pub: 16.00, flex: "가변 시설", reason: "당직/야간 치안 행정 지원용 고정 공간. (일반공용 10% 적용)" },
+            { category: "경찰", name: "경비과 순사무실", net: 86.00, pub: 8.60, flex: "가변 시설", reason: "경비과(과장 1명, 행정 8명) 정원 비례 면적 적용. (일반공용 10% 적용)" },
+            { category: "경찰", name: "청문감사실 순사무실", net: 49.00, pub: 4.90, flex: "가변 시설", reason: "청문감사실(행정 7명) 정원 비례 면적 적용. (일반공용 10% 적용)" },
+            { category: "경찰", name: "회의실 (업무자료실)", net: 33.00, pub: 3.30, flex: "가변 시설", reason: "직원 열람 및 보조 회의용 자료실. (일반공용 10% 적용)" },
+            { category: "공통", name: "수직 관통 코어 고정 면적", net: 0.00, pub: 184.00, flex: "고정 시설", reason: "축소 코어 상수 (경찰 전용 141.00㎡ + 코어 A 43.00㎡)" }
+        ],
+        guidelines: [
+            "여청과/조사실 5층 수용: 3층의 복리후생 특화 층 조성으로 여청과 및 전용조사실을 5층에 수용하여 행정 연동성 확보.",
+            "소회의실 집약: 소회의실 A와 C가 5층에 통합 배치되어 회의 공간 활용도가 대폭 향상됨.",
+            "정보과 보안벽체: 도설 및 도청 방지를 위해 차음성능 STS-45 이상 이중 차음석고 시공."
+        ]
+    },
+    "4F": {
+        title: "지상 4층 (4F)",
+        concept: "서장 지휘 및 경무 행정 집중/상황 관리 통합 구역 [지휘 및 종합 치안 상황 통제 구역]",
+        facilities: [
+            { category: "경찰", name: "순사무실 기관장 (서장실)", net: 80.00, pub: 8.00, flex: "고정 시설", reason: "서장실 및 비서실, 내실 결합. 지휘 보안 확보용 4층 고정. (일반공용 10% 적용)" },
+            { category: "경찰", name: "경무과 순사무실 (경리/장비계 통합)", net: 156.00, pub: 15.60, flex: "가변 시설", reason: "경무과(과장 1명, 행정 18명) 정원 비례 면적 적용. (일반공용 10% 적용)" },
+            { category: "경찰", name: "범죄예방과 순사무실", net: 142.00, pub: 14.20, flex: "가변 시설", reason: "범예과(과장 1명, 행정 16명) 정원 비례 면적 적용. (일반공용 10% 적용)" },
+            { category: "경찰", name: "경무과 지출서류 및 물품보관실", net: 92.00, pub: 9.20, flex: "가변 시설", reason: "경무과 본실과의 접근성을 고려하여 동시 층 조닝. (일반공용 10% 적용)" },
+            { category: "경찰", name: "상황실 (112 상황실)", net: 100.00, pub: 10.00, flex: "고정 시설", reason: "비상 상황 대기소 2개 구축 및 배선 고정형 상황 통제실. (일반공용 10% 적용)" },
+            { category: "경찰", name: "회의실 (소회의실 1/3)", net: 52.00, pub: 5.20, flex: "가변 시설", reason: "소회의실 3개층 분산 계획에 의거하여 4층 구획. (일반공용 10% 적용)" },
+            { category: "경찰", name: "회의실 (대회의실)", net: 99.00, pub: 9.90, flex: "가변 시설", reason: "이동성 가이드에 따라 5층에서 4층 경무과 옆으로 하향 이관. (일반공용 10% 적용)" },
+            { category: "공통", name: "수직 관통 코어 고정 면적", net: 0.00, pub: 184.00, flex: "고정 시설", reason: "축소 코어 상수 (경찰 전용 141.00㎡ + 코어 A 43.00㎡)" }
+        ],
+        guidelines: [
+            "112 상황실 비상 전원: UPS 및 비상발전기 이중화 라인 인입으로 24시간 무중단 운영 보장.",
+            "상황실 이중바닥: 복잡한 통신 배선 수용을 위해 300mm 이상 액세스 플로어 설치."
+        ]
+    },
+    "3F": {
+        title: "지상 3층 (3F)",
+        concept: "식당, 직원용 부대편익, 남/여직원 탈의실 및 외부 테라스 집중 배치 [직원 복리후생 및 휴게 특화 층]",
+        facilities: [
+            { category: "경찰", name: "보조시설 (식당)", net: 250.00, pub: 25.00, flex: "고정 시설", reason: "식당(주방, 창고, 매점 포함) 200명 미만 지침 기준 면적 적용 (선관위와 공동 사용). (일반공용 10% 적용)" },
+            { category: "편익", name: "부대편익시설 (직원용 - 경찰용/선관위용)", net: 332.00, pub: 33.20, flex: "고정 시설", reason: "1층 부대편익시설에서 이관된 직원용 복리 공간. (일반공용 10% 적용)" },
+            { category: "경찰", name: "남직원 탈의실", net: 95.00, pub: 9.50, flex: "고정 시설", reason: "5층에서 3층으로 하향 이관된 남직원 관복보관 및 탈의 공간. (일반공용 10% 적용)" },
+            { category: "경찰", name: "여직원 탈의실", net: 54.00, pub: 5.40, flex: "고정 시설", reason: "5층에서 3층으로 하향 이관된 여직원 전용 휴게 및 탈의 공간. (일반공용 10% 적용)" },
+            { category: "경찰", name: "청소관리용역 사무실", net: 18.00, pub: 1.80, flex: "가변 시설", reason: "1급지 기준 청소원 및 시설관리 용역원 사무공간. (일반공용 10% 적용)" },
+            { category: "경찰", name: "외부 테라스 (서비스 공간)", net: 0.00, pub: 0.00, flex: "가변 시설", reason: "3층 옥외 조경 및 직원 휴게용 실외 외부 테라스 (실내 연면적 계산에서 제외)" },
+            { category: "공통", name: "수직 관통 코어 고정 면적", net: 0.00, pub: 184.00, flex: "고정 시설", reason: "축소 코어 상수 (경찰 전용 141.00㎡ + 코어 A 43.00㎡)" }
+        ],
+        guidelines: [
+            "복리후생 특화 층: 3층 전체를 직원들의 식당, 탈의실, 휴게실 및 직원용 부대편익시설로 집중 배치하여 복지 환경을 대폭 개선함.",
+            "식당 주방 배기/방수: 주방 배기 덕트는 전용 EPS/TPS 공간을 통해 옥상으로 직결 입상하고, 하부 2층 누수 방지 대책 마련.",
+            "외부 테라스 연계: 식당 및 직원용 편익공간에서 진입 가능한 실외 테라스를 계획하여 휴게성 극대화."
+        ]
+    },
+    "2F": {
+        title: "지상 2층 (2F) [유치, 수사 및 선관위 행정 층]",
+        concept: "유치장·수사과 고정 및 선관위 사무/위원회 수용 구획 [유치, 수사 및 선관위 행정 분리 보안 구역]",
+        facilities: [
+            { category: "경찰", name: "유치장 (면회실 포함)", net: 384.00, pub: 19.20, flex: "고정 시설", reason: "피의자 수감 통제를 위한 특수 구조 2층 고정 (원안 준수, 일반공용 5% 적용)" },
+            { category: "경찰", name: "수사과 순사무실", net: 340.00, pub: 17.00, flex: "고정 시설", reason: "★지침 고정: 수사과(과장 1명, 수사조사 31명) 2층 고정 조닝. (정원 비례 면적, 일반공용 5% 적용)" },
+            { category: "경찰", name: "피의자 대기실", net: 25.00, pub: 1.25, flex: "고정 시설", reason: "유치장 연접 계호 효율 보장용 대기실. (일반공용 5% 적용)" },
+            { category: "경찰", name: "진술녹화 및 모니터실", net: 25.00, pub: 1.25, flex: "고정 시설", reason: "피의자 이동 동선 격리를 보장하는 2층 고정 진술녹화실. (일반공용 5% 적용)" },
+            { category: "선관위", name: "선관위 사무실 (국장/직원/정원외)", net: 79.00, pub: 3.95, flex: "고정 시설", reason: "★선관위 1~2F 수용: 3층 상향 이관 불가에 따른 2층 잔류 배치 (원안 준수, 일반공용 5% 적용)" },
+            { category: "선관위", name: "선관위 위원회의실", net: 49.00, pub: 2.45, flex: "고정 시설", reason: "★선관위 1~2F 수용: 사무실과 연접 배치 지침 준수. (일반공용 5% 적용)" },
+            { category: "선관위", name: "선관위 선거사범조사실", net: 20.00, pub: 1.00, flex: "고정 시설", reason: "★선관위 1~2F 수용: 2층 수사과 구역 보안 연동 고려 배치. (일반공용 5% 적용)" },
+            { category: "선관위", name: "선관위 공정선거지원단실", net: 50.00, pub: 2.50, flex: "고정 시설", reason: "★선관위 1~2F 수용: 교통과 1층 전체 상주에 따른 2층 이관 배치 (원안 준수, 일반공용 5% 적용)" },
+            { category: "선관위", name: "선관위 문서고", net: 5.50, pub: 0.275, flex: "고정 시설", reason: "선관위 내부 사무 기능과의 인접 관리를 위해 2층 배치. (일반공용 5% 적용)" },
+            { category: "선관위", name: "선관위 창고", net: 5.50, pub: 0.275, flex: "고정 시설", reason: "선관위 내부 사무 기능과의 인접 관리를 위해 2층 배치. (일반공용 5% 적용)" },
+            { category: "공통", name: "수직 관통 코어 고정 면적 (보안 코어 포함)", net: 0.00, pub: 219.00, flex: "고정 시설", reason: "축소 코어 상수 (경찰 전용 141㎡ + 코어 A 43㎡ + 피의자 보안코어 35㎡)" }
+        ],
+        guidelines: [
+            "수사-유치 원스톱 조닝: 수사과(340㎡)와 유치장(384㎡)이 한 층에 고정 배치되어 사법경찰 수사 효율성 극대화.",
+            "선관위 분리 보안벽: 선관위 사무실/회의실 영역과 경찰 수사 영역 사이에 철저한 보안 게이트 및 방화벽 설치.",
+            "공용률 5% 조율 적용: 2층 GFA 1,350㎡ 이내 수용을 위해 일반공용을 5%로 정밀 통제."
+        ]
+    },
+    "1F": {
+        title: "지상 1층 (1F) [대민 행정, 부대편익, 교통과 및 형사과 상주 층]",
+        concept: "형사과 및 교통과 1층 상주, 주민용 부대편익 95㎡ 배치 [대민 행정, 교통/형사 수사 및 주민 카페 연접 구역]",
+        facilities: [
+            { category: "경찰", name: "민원실", net: 160.00, pub: 8.00, flex: "고정 시설", reason: "무장애 진입을 위한 1층 주 출입구 고정. (일반공용 5% 적용)" },
+            { category: "경찰", name: "교통과 순사무실 (전체)", net: 240.00, pub: 12.00, flex: "고정 시설", reason: "★교통과 1층 상주: 교통부서 전체(과장 1명, 수사조사 14명, 행정 10명) 1층 수용. (정원 비례 면적, 일반공용 5% 적용)" },
+            { category: "경찰", name: "경찰 형사과 (1F 이관)", net: 357.00, pub: 17.85, flex: "고정 시설", reason: "★형사과 1층 상주: 과업지시서 지침에 따라 형사과 전체(과장 1명, 행정 1명, 수사조사 32명) 1층 수용. (정원 비례 면적, 일반공용 5% 적용)" },
+            { category: "선관위", name: "선거관련 문서고 및 물품창고", net: 75.00, pub: 3.75, flex: "고정 시설", reason: "5톤 탑차 접안 하역성 확보를 위해 1층 고정. (일반공용 5% 적용)" },
+            { category: "선관위", name: "선관위 다목적회의실", net: 132.00, pub: 6.60, flex: "고정 시설", reason: "★선관위 1~2F 수용: 3층 이관 불가 및 1층 선거물품창고 인접 배치 지침 준수. (일반공용 5% 적용)" },
+            { category: "편익", name: "부대편익시설 (주민 열린 카페 및 쉼터 등)", net: 95.00, pub: 4.75, flex: "고정 시설", reason: "★1층 배치: 1층 GFA 한도 준수를 위해 부대편익시설 427㎡ 중 주민용(95㎡)만 1층 가로변 배치. (일반공용 5% 적용)" },
+            { category: "경찰", name: "정문안내소", net: 15.00, pub: 0.75, flex: "고정 시설", reason: "보행자 및 차량 통제를 유도하기 위해 입구 고정. (일반공용 5% 적용)" },
+            { category: "공통", name: "수직 관통 코어 고정 면적 (보안 코어 포함)", net: 0.00, pub: 219.00, flex: "고정 시설", reason: "축소 코어 상수 (경찰 전용 141㎡ + 코어 A 43㎡ + 피의자 보안코어 35㎡)" }
+        ],
+        guidelines: [
+            "형사과 1층 배치: 지침에 따라 형사과 전체를 1층에 교통과와 함께 수용하여 수사 기능의 연계성 극대화.",
+            "주민용 부대편익 분할: 1층 면적 포화 해소를 위해 부대편익시설 427㎡ 중 주민용(95㎡)만 1층에 남기고 직원용은 3층으로 이관.",
+            "교통과 1층 상주: 교통과 전체(240㎡)를 1층에 상주시킴으로써 대민 및 내부 상주 근무 편의 극대화.",
+            "축소 코어 적용: 수직 코어 면적을 219㎡로 감축함으로써 전용면적의 감축 없이 지상 1층에 성립."
+        ]
+    },
+    "지상 옥외주차장": {
+        title: "지상 옥외주차장 (Outdoor Parking)",
+        concept: "실내 연면적(GFA 1,350㎡) 제한에서 원천 제외되는 외부 옥외 주차 공간 [GFA 662.85㎡]",
+        facilities: [
+            { category: "공통", name: "지상 옥외주차장 (27대분)", net: 476.00, pub: 186.85, flex: "고정 시설", reason: "지상 외부 옥외 필로티 및 야외 주차 공간. 실내 GFA 1,350㎡ 한도 계산에서 원천 제외. (공용률 39.25% 적용)" }
+        ],
+        guidelines: [
+            "친환경 전기차 충전: 환경친화적 자동차의 주차구획 및 충전설비 옥외 설치 지침 준수.",
+            "차량 통행 완화: 경사로 완화구간 및 보행 동선과의 안전 격리 계획 반영.",
+            "캐노피 적용: 동절기 및 결빙 대비를 위한 상부 캐노피 및 바닥 트렌치 배수 시설 충분히 확보."
+        ]
+    },
+    "B1F": {
+        title: "지하 1층 (B1F)",
+        concept: "지하 물류 창고 집약 및 즉결유실물보관실 이관 배치 [지하 물류 창고 및 지하 주차 메인 구역]",
+        facilities: [
+            { category: "공통", name: "지하 옥내주차장 (B1F 메인)", net: 2000.00, pub: 0.00, flex: "고정 시설", reason: "법정 차로 및 주차 구획을 반영한 표준 주차 라인. 공용 면적 이중 가산 배제." },
+            { category: "경찰", name: "수사+과학수사 창고", net: 137.00, pub: 13.70, flex: "고정 시설", reason: "1.2t/㎡ 슬래브 적재 하중 및 방습 보강이 적용된 지하 창고 배치. (일반공용 10% 적용)" },
+            { category: "경찰", name: "문서고", net: 121.00, pub: 12.10, flex: "가변 시설", reason: "경찰서 장기 보존 서고로서 코어 직결 지하층에 배치. (일반공용 10% 적용)" },
+            { category: "경찰", name: "비품창고", net: 121.00, pub: 12.10, flex: "가변 시설", reason: "비품 반출입 효율 향상을 위해 하역 엘리베이터 연접 배치. (일반공용 10% 적용)" },
+            { category: "경찰", name: "소모품창고", net: 121.00, pub: 12.10, flex: "가변 시설", reason: "전체 소모성 자재 통합 보관 공간. (일반공용 10% 적용)" },
+            { category: "경찰", name: "피복창고", net: 60.40, pub: 6.04, flex: "가변 시설", reason: "피복 보존에 유리한 항온항습 구획 적용. (일반공용 10% 적용)" },
+            { category: "경찰", name: "경무 (문서보관실)", net: 28.00, pub: 2.80, flex: "가변 시설", reason: "가동률이 낮은 장기 보관용 경무 문서고. (일반공용 10% 적용)" },
+            { category: "경찰", name: "생활안전 (압수물/물품보관실)", net: 112.00, pub: 11.20, flex: "가변 시설", reason: "지하 하역 데크 및 화물용 승강기와 직결 연계한 적재 구역. (일반공용 10% 적용)" },
+            { category: "경찰", name: "정보기록보관실", net: 74.00, pub: 7.40, flex: "가변 시설", reason: "3층 사법공조층 면적 조정을 위해 지하 고하중 지반 구역으로 이관. (일반공용 10% 적용)" },
+            { category: "경찰", name: "즉결유실물보관실 (생활안전)", net: 15.00, pub: 1.50, flex: "가변 시설", reason: "지하 2층 사격 통제 구역으로부터 상향 이관하여 보안성 및 민원 접근성 개선. (일반공용 10% 적용)" },
+            { category: "공통", name: "수직 관통 코어 고정 면적", net: 0.00, pub: 184.00, flex: "고정 시설", reason: "축소 코어 상수 (경찰 전용 141.00㎡ + 코어 A 43.00㎡) - 지하 수직 연결성 확보" }
+        ],
+        guidelines: [
+            "유실물 접근성 확보: 즉결유실물보관실을 지하 1층 주차 동선 및 service 승강기 축에 가까이 배치하여 경찰 및 민원인 취급 용이성 도모.",
+            "고하중 적재 보강: 서고 및 대형 비품창고 영역은 1.2ton/㎡의 특수 슬래브 설계 공법 적용.",
+            "지하 수직 코어 반영: 지하 1층에도 지상과 연속되는 수직 코어 면적 184㎡를 공용으로 계상하여 이동 편의 도모."
+        ]
+    },
+    "B2F": {
+        title: "지하 2층 (B2F)",
+        concept: "지반 매립 구조를 이용한 소음/진동 배제 및 특수 보안 구획 [지반 매립 소음/진동 배제 사격장 및 기계전기 설비 구역]",
+        facilities: [
+            { category: "경찰", name: "사격장", net: 464.00, pub: 46.40, flex: "고정 시설", reason: "완벽한 소음 및 방진 제어를 위해 지하 2층 종단 구역에 고정. (일반공용 10% 적용)" },
+            { category: "경찰", name: "무기, 탄약 (수납 종합)", net: 120.00, pub: 12.00, flex: "고정 시설", reason: "사격장 연동 및 피탈/도난 원천 방지용 인접 배치. (일반공용 10% 적용)" },
+            { category: "공통", name: "기계실 / 전기실", net: 1000.00, pub: 0.00, flex: "고정 시설", reason: "건물 전체 기계/전기 공급 기반 및 대형 설비 하중 분산. 공용 면적 이중 가산 배제." },
+            { category: "공통", name: "지하 옥내주차장 (일부)", net: 1280.00, pub: 0.00, flex: "고정 시설", reason: "기초 파일 연동형 표준 옥내 주차. 공용 면적 이중 가산 배제." },
+            { category: "공통", name: "수직 관통 코어 고정 면적", net: 0.00, pub: 184.00, flex: "고정 시설", reason: "축소 코어 상수 (경찰 전용 141.00㎡ + 코어 A 43.00㎡) - 지하 최하층 연결" }
+        ],
+        guidelines: [
+            "권총사격장 사대: 유효 조준거리 25m 확보 및 방탄 차단벽 통제실 구축.",
+            "진동 차폐 공법: 사격장 구조 벽체를 본청 기초와 진동 흡수재로 격리하는 차폐 공법 적용.",
+            "무기고 보완: 두께 200mm 철근콘크리트 옹벽 및 3.2mm 강판 덧씌움 특수 보안 시공.",
+            "지하 수직 코어 반영: 지하 2층에도 지상과 연속되는 수직 코어 면적 184㎡를 공용으로 계상하여 피난 및 수직 이동성 확보."
+        ]
+    }
+};
+
+// ── 연면적 동적 계산 (지상 옥외주차장 원천 제외) ──────────────────────────
+function computeAndRenderStats() {
+    const EXCLUDE_KEY = "지상 옥외주차장";
+    const SPEC_LIMIT  = 13485.00;
+
+    let totalGFA = 0, policeNet = 0, necNet = 0;
+    let policeGnd = 0, policeUnd = 0;
+    let nec1F = 0, nec2F = 0;
+    const undergroundKeys = ["B1F", "B2F"];
+
+    for (const [key, data] of Object.entries(zoningData)) {
+        if (key === EXCLUDE_KEY) continue;          // 지상 옥외주차장 제외
+        data.facilities.forEach(f => {
+            totalGFA += f.net + f.pub;
+            if (f.category === '경찰' && !f.flex.includes('제안')) {
+                policeNet += f.net;
+                if (undergroundKeys.includes(key)) policeUnd += f.net;
+                else policeGnd += f.net;
+            }
+            if (f.category === '선관위' && !f.flex.includes('제안')) {
+                necNet += f.net;
+                if (key === '1F') nec1F += f.net;
+                if (key === '2F') nec2F += f.net;
+            }
+        });
+    }
+
+    const diff     = totalGFA - SPEC_LIMIT;
+    const diffSign = diff >= 0 ? '+' : '';
+    const diffColor = diff > 0 ? 'var(--color-semantic-error)' : 'var(--color-semantic-success)';
+
+    const fmt = v => v.toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    document.getElementById('stat-total-gfa').textContent = fmt(totalGFA) + ' ㎡';
+    document.getElementById('stat-gfa-sub').innerHTML =
+        `지상 옥외주차장(662.85㎡) 연면적 제외 적용 | 한도 13,485㎡ 대비 ` +
+        `<span style="color:${diffColor};font-weight:700;">${diffSign}${diff.toFixed(2)}㎡</span>`;
+
+    document.getElementById('stat-police-net').textContent = fmt(policeNet) + ' ㎡';
+    document.getElementById('stat-police-sub').textContent =
+        `지하층 ${fmt(policeUnd)}㎡ + 지상층 ${fmt(policeGnd)}㎡`;
+
+    document.getElementById('stat-nec-net').textContent = fmt(necNet) + ' ㎡';
+    document.getElementById('stat-nec-sub').innerHTML =
+        `1층 <strong>${nec1F.toFixed(0)}㎡</strong> + 2층 <strong>${nec2F.toFixed(0)}㎡</strong> (1·2층 고정)`;
+}
+// ────────────────────────────────────────────────────────────────────────────
+
+const allocationData = [
+    { label: '기관장 서장실 (1명)', area: 80, pub: 8.0 },
+    { label: '경정급 과장실 (8명)', area: 240, pub: 24.0 },
+    { label: '수사/조사부서 직원 (89명)', area: 890, pub: 89.0 },
+    { label: '행정/기타부서 직원 (74명)', area: 518, pub: 51.8 }
+];
+
+let buildingStackChartInstance = null;
+let floorDonutChartInstance = null;
+let allocationBarChartInstance = null;
+
+// Chart.js 다크모드 공통 설정
+Chart.defaults.color = '#8a8f98';
+Chart.defaults.borderColor = '#23252a';
+Chart.defaults.font.family = 'Inter';
+
+// ── 차트 데이터 동적 계산 (zoningData 기준 자동 동기화) ─────────────────────
+function buildChartData() {
+    const FLOOR_ORDER = ['6F','5F','4F','3F','2F','1F','지상 옥외주차장','B1F','B2F'];
+    const policeNet=[], necNet=[], amenityNet=[], commonPub=[], parkingMep=[];
+
+    FLOOR_ORDER.forEach(key => {
+        const d = zoningData[key];
+        let pn=0, nn=0, an=0, cp=0, pm=0;
+
+        d.facilities.forEach(f => {
+            cp += f.pub;  // 모든 pub → 공통+코어 공용 dataset
+            const nm = f.name;
+            if (f.category === '경찰') {
+                pn += f.net;
+            } else if (f.category === '선관위') {
+                nn += f.net;
+            } else if (f.category === '편익') {
+                an += f.net;
+            } else if (f.category === '공통') {
+                // 주차장 또는 기계/전기실 net → 주차·설비 순면적
+                if (nm.includes('주차장') || nm.includes('주차') || nm.includes('기계') || nm.includes('전기')) {
+                    pm += f.net;
+                }
+                // 코어는 net=0이라 추가 처리 불필요
+            }
+        });
+
+        const r = v => parseFloat(v.toFixed(2));
+        policeNet.push(r(pn));
+        necNet.push(r(nn));
+        amenityNet.push(r(an));
+        commonPub.push(r(cp));
+        parkingMep.push(r(pm));
+    });
+
+    return { policeNet, necNet, amenityNet, commonPub, parkingMep };
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+function initCharts() {
+    const cd = buildChartData();
+    const stackCtx = document.getElementById('buildingStackChart').getContext('2d');
+    buildingStackChartInstance = new Chart(stackCtx, {
+        type: 'bar',
+        data: {
+            labels: ['6F', '5F', '4F', '3F', '2F', '1F', '지상 옥외주차장 (별도)', 'B1F', 'B2F'],
+            datasets: [
+                {
+                    label: '경찰 전용 (Police Net)',
+                    data: cd.policeNet,
+                    backgroundColor: '#5e6ad2'
+                },
+                {
+                    label: '선관위 전용 (NEC Net)',
+                    data: cd.necNet,
+                    backgroundColor: '#f59e0b'
+                },
+                {
+                    label: '부대편익 전용 (Amenity Net)',
+                    data: cd.amenityNet,
+                    backgroundColor: '#27a644'
+                },
+                {
+                    label: '공통 및 코어 공용 (Common/Core Pub)',
+                    data: cd.commonPub,
+                    backgroundColor: 'rgba(255, 255, 255, 0.08)'
+                },
+                {
+                    label: '주차·설비 순면적 (Parking/MEP Net)',
+                    data: cd.parkingMep,
+                    backgroundColor: '#64748b'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            scales: {
+                x: {
+                    stacked: true,
+                    grid: { color: '#23252a' },
+                    ticks: { color: '#8a8f98', font: { family: 'JetBrains Mono', size: 10 } }
+                },
+                y: {
+                    stacked: true,
+                    grid: { color: '#23252a' },
+                    ticks: { color: '#8a8f98', font: { family: 'JetBrains Mono', size: 10 } }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    backgroundColor: '#141516',
+                    titleColor: '#f7f8f8',
+                    bodyColor: '#f7f8f8',
+                    borderColor: '#34343a',
+                    borderWidth: 1,
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': ' + context.parsed.x.toLocaleString() + ' m²';
+                        }
+                    }
+                },
+                legend: {
+                    position: 'bottom',
+                    labels: { color: '#d0d6e0', font: { size: 10 } }
+                }
+            }
+        }
+    });
+
+    const allocCtx = document.getElementById('allocationBarChart').getContext('2d');
+    allocationBarChartInstance = new Chart(allocCtx, {
+        type: 'bar',
+        data: {
+            labels: allocationData.map(d => d.label),
+            datasets: [
+                {
+                    label: '전용 배분면적 (m²)',
+                    data: allocationData.map(d => d.area),
+                    backgroundColor: '#7a7fad'
+                },
+                {
+                    label: '공용 배분면적 (m²)',
+                    data: allocationData.map(d => d.pub),
+                    backgroundColor: 'rgba(122, 127, 173, 0.15)'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    stacked: true,
+                    grid: { color: '#23252a' },
+                    ticks: { color: '#8a8f98', font: { size: 11 } }
+                },
+                y: {
+                    stacked: true,
+                    beginAtZero: true,
+                    grid: { color: '#23252a' },
+                    ticks: { color: '#8a8f98', font: { family: 'JetBrains Mono', size: 10 } }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    backgroundColor: '#141516',
+                    borderColor: '#34343a',
+                    borderWidth: 1
+                },
+                legend: {
+                    position: 'bottom',
+                    labels: { color: '#d0d6e0' }
+                }
+            }
+        }
+    });
+
+    const donutCtx = document.getElementById('floorDonutChart').getContext('2d');
+    floorDonutChartInstance = new Chart(donutCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['전용면적합', '공용면적합'],
+            datasets: [{
+                data: [0, 0],
+                backgroundColor: ['#5e6ad2', 'rgba(94, 106, 210, 0.2)'],
+                borderColor: '#23252a',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        boxWidth: 8,
+                        color: '#d0d6e0',
+                        font: { size: 9, family: 'Inter' }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: '#141516',
+                    borderColor: '#34343a',
+                    borderWidth: 1
+                }
+            }
+        }
+    });
+}
+
+function renderFloor(floorKey) {
+    const data = zoningData[floorKey];
+    
+    document.getElementById('current-floor-title').innerText = data.title;
+    document.getElementById('current-floor-concept').innerText = data.concept;
+
+    const btns = document.querySelectorAll('.floor-btn');
+    btns.forEach(btn => {
+        if(btn.dataset.floor === floorKey) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+
+    const tbody = document.getElementById('floor-table-body');
+    tbody.innerHTML = '';
+    
+    let totalNet = 0;
+    let totalPub = 0;
+
+    // 카테고리 정렬 순서 정의
+    const catOrder = { "경찰": 1, "선관위": 2, "편익": 3, "공통": 4 };
+    const sortedFacilities = [...data.facilities].sort((a, b) => {
+        return (catOrder[a.category] || 99) - (catOrder[b.category] || 99);
+    });
+
+    let lastCategory = null;
+
+    // 코어 항목(net=0)과 일반 시설 분리
+    const regularFacilities = sortedFacilities.filter(f => f.net > 0);
+    const coreFacilities = sortedFacilities.filter(f => f.net === 0);
+
+    // 전체 합산
+    sortedFacilities.forEach(fac => {
+        totalNet += fac.net;
+        totalPub += fac.pub;
+    });
+
+    // 일반 시설 렌더링 (전용면적 ±3% 표기)
+    regularFacilities.forEach(fac => {
+        if (lastCategory !== fac.category) {
+            if (lastCategory !== null) {
+                const spacerTr = document.createElement('tr');
+                spacerTr.className = 'group-divider';
+                spacerTr.innerHTML = `<td colspan="7" style="height: 16px; border: none; padding: 0; background: transparent;"></td>`;
+                tbody.appendChild(spacerTr);
+            }
+            const headTr = document.createElement('tr');
+            headTr.className = 'group-header';
+            let categoryName = fac.category;
+            let dotColor = '#8a8f98';
+            if (fac.category === '경찰') { categoryName = '영도경찰서 구역 (Police Zone)'; dotColor = '#828fff'; }
+            else if (fac.category === '선관위') { categoryName = '영도구선거관리위원회 구역 (NEC Zone)'; dotColor = '#f59e0b'; }
+            else if (fac.category === '편익') { categoryName = '주민 개방형 부대편익시설 (Amenities)'; dotColor = '#27a644'; }
+            else if (fac.category === '공통') { categoryName = '통합청사 공통/코어 영역 (Common/Core)'; dotColor = '#8a8f98'; }
+            headTr.innerHTML = `
+                <td colspan="7" style="background-color: var(--color-surface-3); font-weight: 700; padding: 8px 16px; border-bottom: 1px solid var(--color-hairline-strong); font-size: 11px; letter-spacing: 0.02em;">
+                    <span style="color: ${dotColor}; margin-right: 6px;">■</span><span style="color: var(--color-ink);">${categoryName}</span>
+                </td>
+            `;
+            tbody.appendChild(headTr);
+            lastCategory = fac.category;
+        }
+
+        let badgeClass = 'badge-flexible';
+        if(fac.flex.includes('고정')) badgeClass = 'badge-fixed';
+        if(fac.flex.includes('제한')) badgeClass = 'badge-semi';
+        if(fac.flex.includes('제안')) badgeClass = 'badge-proposal';
+        let categoryColor = 'color-common';
+        if (fac.category === '경찰') categoryColor = 'color-police';
+        else if (fac.category === '선관위') categoryColor = 'color-nec';
+        else if (fac.category === '편익') categoryColor = 'color-amenity';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td class="${categoryColor}">${fac.category}</td>
+            <td style="font-weight: 600; color: var(--color-ink);">${fac.name}</td>
+            <td style="text-align: right; font-weight: 700; color: var(--color-ink);" class="font-mono">${fac.net.toFixed(2)} m²</td>
+            <td style="text-align: right; color: #ff7070;" class="font-mono">${(fac.net * 0.97).toFixed(2)} m²</td>
+            <td style="text-align: right; color: var(--color-semantic-success);" class="font-mono">${(fac.net * 1.03).toFixed(2)} m²</td>
+            <td style="text-align: center;"><span class="badge ${badgeClass}">${fac.flex}</span></td>
+            <td style="color: var(--color-ink-subtle); line-height: 1.4; max-width: 380px;">${fac.reason}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    // 층별 공용면적 통합 행 (코어 + 복도 일체)
+    const isLowerFloor = ['1F', '2F'].includes(floorKey);
+    const pubLabel = isLowerFloor
+        ? '층별 공용면적 (복도, 코어 및 호송코어 포함)'
+        : '층별 공용면적 (복도 및 코어)';
+    const pubNote = isLowerFloor
+        ? '호송코어 35㎡ 포함 보안코어 일체화 (경찰 전용 141 + 코어 A 43 + 호송보안 35)'
+        : '수직 관통 코어 면적 일체화 (경찰 전용 141 + 코어 A 43)';
+    const spacerPub = document.createElement('tr');
+    spacerPub.className = 'group-divider';
+    spacerPub.innerHTML = `<td colspan="7" style="height: 16px; border: none; padding: 0; background: transparent;"></td>`;
+    tbody.appendChild(spacerPub);
+    const pubRow = document.createElement('tr');
+    pubRow.style.cssText = 'background-color: rgba(255,255,255,0.01);';
+    pubRow.innerHTML = `
+        <td class="color-common" style="font-size:11px;">공통</td>
+        <td style="font-weight: 600; color: var(--color-ink-subtle);">${pubLabel}</td>
+        <td style="text-align: right; font-weight: 700; color: var(--color-ink-subtle);" class="font-mono">${totalPub.toFixed(2)} m²</td>
+        <td colspan="2" style="text-align: center; color: var(--color-ink-subtle); font-size: 11px; font-style: italic;">— 공용면적 ±3% 미적용 —</td>
+        <td style="text-align: center;"><span class="badge badge-fixed">고정 시설</span></td>
+        <td style="color: var(--color-ink-subtle); font-size: 11px;">${pubNote}</td>
+    `;
+    tbody.appendChild(pubRow);
+
+    // 합계 행
+    const totalGFA = totalNet + totalPub;
+    const totalRow = document.createElement('tr');
+    totalRow.className = "sum-row";
+    totalRow.innerHTML = `
+        <td style="text-align: center;" colspan="2">해당 층 전용면적 합계 및 GFA</td>
+        <td style="text-align: right;" class="font-mono">${totalNet.toFixed(2)} m² <span style="font-size:10px;opacity:0.6;">(전용)</span></td>
+        <td style="text-align: right; color: #ff7070;" class="font-mono">${(totalNet * 0.97).toFixed(2)} m²</td>
+        <td style="text-align: right; color: var(--color-semantic-success); font-size: 13px;" class="font-mono">${(totalNet * 1.03).toFixed(2)} m²</td>
+        <td style="text-align: center;" colspan="2"><span style="font-size: 11px; color: var(--color-brand-light); font-weight: 700; text-transform: uppercase;">GFA ${totalGFA.toFixed(2)} m²</span></td>
+    `;
+    tbody.appendChild(totalRow);
+
+    // Update Donut Chart
+    floorDonutChartInstance.data.datasets[0].data = [parseFloat(totalNet.toFixed(2)), parseFloat(totalPub.toFixed(2))];
+    floorDonutChartInstance.update();
+
+    // Injects Guidelines
+    const gContainer = document.getElementById('special-guidelines-container');
+    const gList = document.getElementById('special-guidelines-list');
+    if (data.guidelines && data.guidelines.length > 0) {
+        gContainer.style.display = 'block';
+        gList.innerHTML = data.guidelines.map(g => `<p style="margin-bottom: 4px;">• ${g}</p>`).join('');
+    } else {
+        gContainer.style.display = 'none';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    computeAndRenderStats();
+    initCharts();
+
+    const floorContainer = document.getElementById('floor-buttons');
+    const floorsOrder = ["6F", "5F", "4F", "3F", "2F", "1F", "지상 옥외주차장", "B1F", "B2F"];
+    
+    floorsOrder.forEach(key => {
+        const btn = document.createElement('button');
+        btn.dataset.floor = key;
+        btn.className = 'floor-btn';
+        btn.innerText = key;
+        btn.addEventListener('click', () => renderFloor(key));
+        floorContainer.appendChild(btn);
+    });
+
+    // Default load 1F
+    renderFloor('1F');
+});
+</script>
+</body>
+</html>
